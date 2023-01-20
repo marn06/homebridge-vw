@@ -63,12 +63,12 @@ class Climatisation implements AccessoryPlugin {
             log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null, this.climatisationOn)
           }, (err) => {
-            this.log.error(err.message)
+            this.log.error("Error: " + err.message)
             callback()
           })
-        }
+        } 
         catch (error: any) {
-          this.log(error)
+          this.log.error("Error: " + error)
           callback()
         }
       })
@@ -82,12 +82,12 @@ class Climatisation implements AccessoryPlugin {
             log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null)
           }, (err) => {
-            this.log.error(err.message)
+            this.log.error("Error: " + err.message)
             callback()
           })
         }
         catch (error: any) {
-          this.log(error)
+          this.log.error("Error: " + error)
           callback()
         }
       })
@@ -121,7 +121,6 @@ class Climatisation implements AccessoryPlugin {
     python.stdout.on('data', (data) => {
       let parsed = JSON.parse(data)
       success = parsed.currentState == value
-      this.log(data)
     });
 
     return timeoutPromise(new Promise((resolve, reject) => {
@@ -148,7 +147,6 @@ class Climatisation implements AccessoryPlugin {
     });
 
     python.stdout.on('data', (data) => {
-      this.log(data)
       let parsed = JSON.parse(data)
       if (command == 'cabin-heating') {
         currentState = parsed.cabinHeating

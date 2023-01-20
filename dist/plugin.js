@@ -29,12 +29,12 @@ class Climatisation {
                     log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"));
                     callback(null, this.climatisationOn);
                 }, (err) => {
-                    this.log.error(err.message);
+                    this.log.error("Error: " + err.message);
                     callback();
                 });
             }
             catch (error) {
-                this.log(error);
+                this.log.error("Error: " + error);
                 callback();
             }
         })
@@ -46,12 +46,12 @@ class Climatisation {
                     log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"));
                     callback(null);
                 }, (err) => {
-                    this.log.error(err.message);
+                    this.log.error("Error: " + err.message);
                     callback();
                 });
             }
             catch (error) {
-                this.log(error);
+                this.log.error("Error: " + error);
                 callback();
             }
         });
@@ -78,7 +78,6 @@ class Climatisation {
         python.stdout.on('data', (data) => {
             let parsed = JSON.parse(data);
             success = parsed.currentState == value;
-            this.log(data);
         });
         return (0, timeoutPromise_1.default)(new Promise((resolve, reject) => {
             python.on('close', (code) => {
@@ -100,7 +99,6 @@ class Climatisation {
             error = data;
         });
         python.stdout.on('data', (data) => {
-            this.log(data);
             let parsed = JSON.parse(data);
             if (command == 'cabin-heating') {
                 currentState = parsed.cabinHeating;
