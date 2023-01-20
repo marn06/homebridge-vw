@@ -1,0 +1,49 @@
+{
+    "pluginAlias": "Climatisation",
+    "pluginType": "accessory",
+    "singular": true,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "title": "Name",
+                "default": "VW Climatisation",
+                "type": "string",
+                "required": true
+            },
+            "username": {
+                "title": "Username",
+                "type": "string",
+                "default": "",
+                "description": "Is the username (email) assigned to your WeConnect account",
+                "required": true
+            },
+            "vin": {
+                "title": "VIN",
+                "type": "string",
+                "default": "",
+                "description": "VIN of the car, if empty VIN of first car will be used",
+            },
+            "password": {
+                "title": "Password",
+                "type": "string",
+                "default": "",
+                "description": "Is the password assigned to your WeConnect account",
+                "required": true
+            },
+            "spin": {
+                "title": "Spin",
+                "type": "string",
+                "default": "",
+                "description": "Spin is the 4 digit code assigned to your WeConnect account",
+                "required": true
+            },
+            "pollInterval": {
+                "title": "Poll Interval",
+                "type": "number",
+                "default": 300,
+                "description": "How often to request for changes in seconds"
+            }
+        }
+    }
+}

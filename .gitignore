@@ -1,0 +1,4 @@
+node_modules
+__pycache__
+weconnectAPI.access
+weconnectAPI.session

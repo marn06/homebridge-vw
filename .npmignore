@@ -1,0 +1,6 @@
+.github
+src
+tsconfig.json
+__pycache__
+weconnectAPI.access
+weconnectAPI.sessiong
