@@ -53,8 +53,6 @@ class Climatisation implements AccessoryPlugin {
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
         this.log("Get climatisation state")
         
-        let success = false
-
         if (this.lastRequest != undefined) {
           var now = new Date()
           var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000
@@ -72,7 +70,6 @@ class Climatisation implements AccessoryPlugin {
             this.climatisationOn = on
             log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null, this.climatisationOn)
-            success = true
           }, (error) => {
             this.log.error("Get Error: " + error)
             callback()
@@ -82,38 +79,27 @@ class Climatisation implements AccessoryPlugin {
           this.log.error("Try Get Error: " + error)
           callback()
         }
-        
-        if (!success) {
-          setTimeout(() => {
-            this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(false)
-          }, 500);
-        }
       })
 
       .on(CharacteristicEventTypes.SET, (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
         this.log(`Set climatisation state ${value}`)
 
-        let success = false
         try {
           this.setCurrentState('cabin-heating', value == true ? '1' : '0').then(() => {
             this.climatisationOn = (value == "1")
             log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null)
-            success = true
           }, (error) => {
             this.log.error("Set Error: " + error.message)
-            callback()
+            setTimeout(() => {
+              this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(false)
+            }, 1000);
+            callback(null)
           })
         }
         catch (error) {
           this.log.error("Try Set Error: " + error)
           callback()
-        }
-
-        if (!success) {
-          setTimeout(() => {
-            this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(false)
-          }, 500);
         }
       })
 
