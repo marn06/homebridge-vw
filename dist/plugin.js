@@ -36,16 +36,12 @@ class Climatisation {
                     log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"));
                     callback(null, this.climatisationOn);
                 }, (error) => {
-                    if (error != undefined) {
-                        this.log.error("Error: " + error);
-                    }
+                    this.log.error("Get Error: " + error);
                     callback();
                 });
             }
             catch (error) {
-                if (error != undefined) {
-                    this.log.error("Error: " + error);
-                }
+                this.log.error("Try Get Error: " + error);
                 callback();
             }
         })
@@ -57,16 +53,12 @@ class Climatisation {
                     log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"));
                     callback(null);
                 }, (error) => {
-                    if (error != undefined) {
-                        this.log.error("Error: " + error.message);
-                    }
+                    this.log.error("Set Error: " + error.message);
                     callback();
                 });
             }
             catch (error) {
-                if (error != undefined) {
-                    this.log.error("Error: " + error);
-                }
+                this.log.error("Try Set Error: " + error);
                 callback();
             }
         });
