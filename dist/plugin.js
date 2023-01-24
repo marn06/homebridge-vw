@@ -84,10 +84,9 @@ class Climatisation {
         let currentState = false;
         python.stderr.on('data', (data) => {
             error = data;
-            this.log("Python Error: " + error);
+            this.log("Python: " + error);
         });
         python.stdout.on('data', (data) => {
-            this.log("Data: " + data.toString());
             let parsed = JSON.parse(data);
             if (command == 'cabin-heating') {
                 currentState = parsed.cabinHeating;
@@ -126,10 +125,9 @@ class Climatisation {
         let currentState = false;
         python.stderr.on('data', (data) => {
             error = data;
-            this.log("Python Error: " + error);
+            this.log("Python: " + error);
         });
         python.stdout.on('data', (data) => {
-            this.log("Data: " + data.toString());
             let parsed = JSON.parse(data);
             if (command == 'cabin-heating') {
                 currentState = parsed.cabinHeating;
@@ -137,7 +135,6 @@ class Climatisation {
             else if (command == 'locked') {
                 currentState = parsed.locked;
             }
-            this.log("Success: " + success);
             success = true;
         });
         return (0, timeoutPromise_1.default)(new Promise((resolve, reject) => {

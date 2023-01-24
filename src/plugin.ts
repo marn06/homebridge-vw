@@ -127,11 +127,10 @@ class Climatisation implements AccessoryPlugin {
 
     python.stderr.on('data', (data) => {
       error = data
-      this.log("Python Error: " + error)
+      this.log("Python: " + error)
     })
 
     python.stdout.on('data', (data) => {
-      this.log("Data: " + data.toString())
       let parsed = JSON.parse(data)
       if (command == 'cabin-heating') {
         currentState = parsed.cabinHeating
@@ -176,11 +175,10 @@ class Climatisation implements AccessoryPlugin {
 
     python.stderr.on('data', (data) => {
       error = data
-      this.log("Python Error: " + error)
+      this.log("Python: " + error)
     })
 
     python.stdout.on('data', (data) => {
-      this.log("Data: " + data.toString())
       let parsed = JSON.parse(data)
       if (command == 'cabin-heating') {
         currentState = parsed.cabinHeating
@@ -188,7 +186,6 @@ class Climatisation implements AccessoryPlugin {
       else if (command == 'locked') {
         currentState = parsed.locked
       }
-      this.log("Success: " + success)
       success = true
     })
 
