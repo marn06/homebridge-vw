@@ -78,22 +78,24 @@ try:
 	if len(vin) == 0:
 		vin = vwc.get_real_car_data()['realCars'][0]['vehicleIdentificationNumber']
 		carStates[vin] = CarState()
-
+		logger.debug("VIN: " + vin)
+ 
 	if command == 'locked':
 		isLocked = getLockedStatus(vwc, vin)
 
-		if value == '1':
-			if not isLocked:
-				vwc.lock(vin, action='lock')
-		elif value == '0':
-			if isLocked:
-				vwc.lock(vin, action='unlock')
+		if value == '1' and not isLocked:
+			response = vwc.lock(vin, action='lock')
+			logger.debug(response)
+		elif value == '0' and isLocked:
+			response = vwc.lock(vin, action='unlock')
+			logger.debug(response)
 		elif value == 'status':
 			pass
 		else:
-			print('command: ' + command + ' unknown value: ' + value)
+			print('Command: ' + command + ' unknown value: ' + value)
+			exit(1)
 
-		carStates[vin].locked = '1' if isLocked else '0'
+		carStates[vin].locked = isLocked
 		print(json_helpers.to_json(carStates[vin], unpicklable=False))
 		persistCarStates(carStates)
 	elif command == 'cabin-heating':
@@ -102,15 +104,16 @@ try:
 		if value == '1':
 			on = vwc.climatisation_v2(vin, action='on', temperature=24.0)
 			logger.error(on)
-			cabinHeatingStatus = '1' if (on['action']['actionState'] == 'queued' and on['action']['type'] == 'startClimatisation') else '0'
+			cabinHeatingStatus = True if (on['action']['actionState'] == 'queued' and on['action']['type'] == 'startClimatisation') else False
 		elif value == '0':
 			off = vwc.climatisation(vin, action='off')
 			logger.error(off)
-			cabinHeatingStatus = '0' if (off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else '1'
+			cabinHeatingStatus = True if (off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else False
 		elif value == 'status':
 			pass
 		else:
-			print('command: ' + command + ' unknown value: ' + value)
+			print('Command: ' + command + ' unknown value: ' + value)
+			exit(1)
 
 		carStates[vin].cabinHeating = cabinHeatingStatus
 		print(json_helpers.to_json(carStates[vin], unpicklable=False))
