@@ -1,7 +1,7 @@
 {
   "name": "homebridge-vw",
   "displayName": "Homebridge VW",
-  "version": "0.0.64-alpha",
+  "version": "0.0.65-alpha",
   "description": "Homebridge plugin for VW We Connect",
   "main": "dist/plugin.js",
   "devDependencies": {

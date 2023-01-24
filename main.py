@@ -92,7 +92,7 @@ try:
 			print('Command: ' + command + ' unknown value: ' + value)
 			exit(1)
 
-		carStates[vin].locked = isLocked
+		carStates[vin]['locked'] = isLocked
 		print(json_helpers.to_json(carStates[vin], unpicklable=False))
 		persistCarStates(carStates)
 	elif command == 'cabin-heating':
@@ -112,7 +112,7 @@ try:
 			print('Command: ' + command + ' unknown value: ' + value)
 			exit(1)
 
-		carStates[vin].cabinHeating = cabinHeatingStatus
+		carStates[vin]['cabinHeating'] = cabinHeatingStatus
 		print(json_helpers.to_json(carStates[vin], unpicklable=False))
 		persistCarStates(carStates)
 	else:
@@ -124,4 +124,4 @@ except VWError as e:
 	else:
 		logger.error("VWError: " + e.message)
 except Exception as e:
-	logger.error("Fatal Error: " + e)
+	logger.error("Fatal Error: " + str(e))
