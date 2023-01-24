@@ -29,10 +29,7 @@ def getCabinHeatingStatus(vwc, vin):
 
 	logger.debug("Climater status: " + json_helpers.to_json(climaterStatus, unpicklable=False))
 
-	if (state):
-		return 1
-	else:
-		return 0 
+	return state
 	
 def getLockedStatus(vwc, vin):
 	vsr = vwc.get_vsr(vin)
