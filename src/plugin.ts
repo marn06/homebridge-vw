@@ -69,7 +69,9 @@ class Climatisation implements AccessoryPlugin {
             log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null, this.climatisationOn)
           }, (err) => {
-            this.log.error("Error: " + err.message)
+            if (err) {
+              this.log.error("Error: " + err.message)
+            }
             callback()
           })
         }
@@ -88,7 +90,9 @@ class Climatisation implements AccessoryPlugin {
             log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null)
           }, (err) => {
-            this.log.error("Error: " + err.message)
+            if (err) {
+              this.log.error("Error: " + err.message)
+            }
             callback()
           })
         }
@@ -145,6 +149,7 @@ class Climatisation implements AccessoryPlugin {
   async getCurrentState(command: string): Promise<boolean> {
     let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status']);
 
+    let success = false
     let error: string | null = null
     let currentState = false
 
@@ -162,15 +167,16 @@ class Climatisation implements AccessoryPlugin {
       else if (command == 'locked') {
         currentState = parsed.locked
       }
+      success = true
     });
 
     return timeoutPromise(new Promise((resolve, reject) => {
       python.on('close', (code) => {
-        if (error) {
-          reject(error)
+        if (success) {
+          resolve(currentState)
         }
         else {
-          resolve(currentState)
+          reject(error)
         }
       })
     }), 10000, new Error(`Timed out getting state of ${command}`))

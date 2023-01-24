@@ -36,7 +36,9 @@ class Climatisation {
                     log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"));
                     callback(null, this.climatisationOn);
                 }, (err) => {
-                    this.log.error("Error: " + err.message);
+                    if (err) {
+                        this.log.error("Error: " + err.message);
+                    }
                     callback();
                 });
             }
@@ -53,7 +55,9 @@ class Climatisation {
                     log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"));
                     callback(null);
                 }, (err) => {
-                    this.log.error("Error: " + err.message);
+                    if (err) {
+                        this.log.error("Error: " + err.message);
+                    }
                     callback();
                 });
             }
@@ -100,6 +104,7 @@ class Climatisation {
     }
     async getCurrentState(command) {
         let python = (0, child_process_1.spawn)((0, path_1.join)(__dirname, '/venv/bin/python3'), [(0, path_1.join)(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status']);
+        let success = false;
         let error = null;
         let currentState = false;
         python.stderr.on('data', (data) => {
@@ -115,14 +120,15 @@ class Climatisation {
             else if (command == 'locked') {
                 currentState = parsed.locked;
             }
+            success = true;
         });
         return (0, timeoutPromise_1.default)(new Promise((resolve, reject) => {
             python.on('close', (code) => {
-                if (error) {
-                    reject(error);
+                if (success) {
+                    resolve(currentState);
                 }
                 else {
-                    resolve(currentState);
+                    reject(error);
                 }
             });
         }), 10000, new Error(`Timed out getting state of ${command}`));
