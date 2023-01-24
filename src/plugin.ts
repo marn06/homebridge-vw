@@ -11,9 +11,9 @@ import {
   Service
 } from "homebridge"
 
-import timeoutPromise from "./timeoutPromise";
-import { join } from 'path';
-import { ChildProcess, spawn } from 'child_process';
+import timeoutPromise from "./timeoutPromise"
+import { join } from 'path'
+import { spawn } from 'child_process'
 
 let hap: HAP
 
@@ -48,14 +48,14 @@ class Climatisation implements AccessoryPlugin {
     this.lastRequest = new Date()
 
     this.fanService = new hap.Service.Fan(this.name)
-    
+
     this.fanService.getCharacteristic(hap.Characteristic.On)
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
         this.log("Get climatisation state")
 
         if (this.lastRequest != undefined) {
-          var now = new Date();
-          var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
+          var now = new Date()
+          var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000
 
           if (duration < 30) {
             this.log("Multiple requests within 30 seconds")
@@ -124,7 +124,7 @@ class Climatisation implements AccessoryPlugin {
   }
 
   async setCurrentState(command: string, value: string): Promise<void> {
-    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, value]);
+    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, value])
 
     let success = false
     let error: string | null = null
@@ -132,8 +132,8 @@ class Climatisation implements AccessoryPlugin {
 
     python.stderr.on('data', (data) => {
       error = data
-      this.log("Error: " + error)
-    });
+      this.log("Python Error: " + error)
+    })
 
     python.stdout.on('data', (data) => {
       this.log("Data: " + data.toString())
@@ -151,7 +151,7 @@ class Climatisation implements AccessoryPlugin {
       else if (value == '0' && !currentState) {
         success = true
       }
-    });
+    })
 
     return timeoutPromise(new Promise((resolve, reject) => {
       python.on('close', (code) => {
@@ -173,7 +173,7 @@ class Climatisation implements AccessoryPlugin {
   }
 
   async getCurrentState(command: string): Promise<boolean> {
-    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status']);
+    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status'])
 
     let success = false
     let error: string | null = null
@@ -181,8 +181,8 @@ class Climatisation implements AccessoryPlugin {
 
     python.stderr.on('data', (data) => {
       error = data
-      this.log("Error: " + error)
-    });
+      this.log("Python Error: " + error)
+    })
 
     python.stdout.on('data', (data) => {
       this.log("Data: " + data.toString())
@@ -195,7 +195,7 @@ class Climatisation implements AccessoryPlugin {
       }
       this.log("Success: " + success)
       success = true
-    });
+    })
 
     return timeoutPromise(new Promise((resolve, reject) => {
       python.on('close', (code) => {

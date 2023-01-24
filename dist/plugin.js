@@ -89,7 +89,7 @@ class Climatisation {
         let currentState = false;
         python.stderr.on('data', (data) => {
             error = data;
-            this.log("Error: " + error);
+            this.log("Python Error: " + error);
         });
         python.stdout.on('data', (data) => {
             this.log("Data: " + data.toString());
@@ -131,7 +131,7 @@ class Climatisation {
         let currentState = false;
         python.stderr.on('data', (data) => {
             error = data;
-            this.log("Error: " + error);
+            this.log("Python Error: " + error);
         });
         python.stdout.on('data', (data) => {
             this.log("Data: " + data.toString());
