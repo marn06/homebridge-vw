@@ -120,8 +120,8 @@ try:
 
 except VWError as e:
 	if 'login.error' in e.message:
-		logger.error('Failed to login')
+		logger.error('VWError: Failed to login')
 	else:
-		logger.error("Error: " + e.message)
+		logger.error("VWError: " + e.message)
 except Exception as e:
-	logger.error("Error: " + e)
+	logger.error("Fatal Error: " + e)

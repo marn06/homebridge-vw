@@ -99,7 +99,7 @@ class Climatisation implements AccessoryPlugin {
             }
             callback()
           })
-        }
+        } 
         catch (error) {
           if (error != undefined) {
             this.log.error("Error: " + error)
