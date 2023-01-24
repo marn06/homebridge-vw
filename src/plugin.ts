@@ -55,6 +55,12 @@ class Climatisation implements AccessoryPlugin {
         var now = new Date();
         var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
 
+        if (duration < 30) {
+          return callback(null, this.climatisationOn)
+        }
+
+        this.lastRequest = new Date()
+
         this.log("duration: " + duration)
 
         try {
@@ -115,7 +121,7 @@ class Climatisation implements AccessoryPlugin {
 
     python.stderr.on('data', (data) => {
       error = data
-      this.log("Error: " + data)
+      this.log("Error: " + error)
     });
 
     python.stdout.on('data', (data) => {
@@ -125,11 +131,11 @@ class Climatisation implements AccessoryPlugin {
 
     return timeoutPromise(new Promise((resolve, reject) => {
       python.on('close', (code) => {
-        if (error) {
-          reject(error)
+        if (success) {
+          resolve()
         }
         else {
-          resolve()
+          reject(error)
         }
       })
     }), 10000, new Error(`Timed out setting state of ${command} to ${value}`))
@@ -142,8 +148,8 @@ class Climatisation implements AccessoryPlugin {
     let currentState = false
 
     python.stderr.on('data', (data) => {
-      this.log("Error: " + data)
       error = data
+      this.log("Error: " + error)
     });
 
     python.stdout.on('data', (data) => {

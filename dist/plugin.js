@@ -22,6 +22,10 @@ class Climatisation {
             this.log("Get climatisation state");
             var now = new Date();
             var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
+            if (duration < 30) {
+                return callback(null, this.climatisationOn);
+            }
+            this.lastRequest = new Date();
             this.log("duration: " + duration);
             try {
                 this.getCurrentState('cabin-heating').then((on) => {
@@ -73,7 +77,7 @@ class Climatisation {
         let success = false;
         python.stderr.on('data', (data) => {
             error = data;
-            this.log("Error: " + data);
+            this.log("Error: " + error);
         });
         python.stdout.on('data', (data) => {
             let parsed = JSON.parse(data);
@@ -81,11 +85,11 @@ class Climatisation {
         });
         return (0, timeoutPromise_1.default)(new Promise((resolve, reject) => {
             python.on('close', (code) => {
-                if (error) {
-                    reject(error);
+                if (success) {
+                    resolve();
                 }
                 else {
-                    resolve();
+                    reject(error);
                 }
             });
         }), 10000, new Error(`Timed out setting state of ${command} to ${value}`));
@@ -95,8 +99,8 @@ class Climatisation {
         let error = null;
         let currentState = false;
         python.stderr.on('data', (data) => {
-            this.log("Error: " + data);
             error = data;
+            this.log("Error: " + error);
         });
         python.stdout.on('data', (data) => {
             let parsed = JSON.parse(data);
