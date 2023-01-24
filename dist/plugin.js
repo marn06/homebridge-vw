@@ -8,6 +8,7 @@ const child_process_1 = require("child_process");
 let hap;
 class Climatisation {
     constructor(log, config, api) {
+        this.lastRequest = undefined;
         this.climatisationOn = false;
         this.log = log;
         this.name = config.name;
@@ -20,13 +21,15 @@ class Climatisation {
         this.fanService.getCharacteristic(hap.Characteristic.On)
             .on("get" /* CharacteristicEventTypes.GET */, (callback) => {
             this.log("Get climatisation state");
-            var now = new Date();
-            var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
-            if (duration < 30) {
-                return callback(null, this.climatisationOn);
+            if (this.lastRequest != undefined) {
+                var now = new Date();
+                var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
+                if (duration < 30) {
+                    return callback(null, this.climatisationOn);
+                }
+                this.log("duration: " + duration);
             }
             this.lastRequest = new Date();
-            this.log("duration: " + duration);
             try {
                 this.getCurrentState('cabin-heating').then((on) => {
                     this.climatisationOn = on;
@@ -80,6 +83,7 @@ class Climatisation {
             this.log("Error: " + error);
         });
         python.stdout.on('data', (data) => {
+            this.log("DATA: " + data.toString());
             let parsed = JSON.parse(data);
             success = parsed.currentState == value;
         });
@@ -103,6 +107,7 @@ class Climatisation {
             this.log("Error: " + error);
         });
         python.stdout.on('data', (data) => {
+            this.log("DATA: " + data.toString());
             let parsed = JSON.parse(data);
             if (command == 'cabin-heating') {
                 currentState = parsed.cabinHeating;

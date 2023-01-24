@@ -30,7 +30,7 @@ class Climatisation implements AccessoryPlugin {
   private readonly password: string
   private readonly spin: string
 
-  private lastRequest: Date
+  private lastRequest: Date | undefined = undefined
   private climatisationOn = false
 
   private readonly fanService: Service
@@ -52,16 +52,16 @@ class Climatisation implements AccessoryPlugin {
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
         this.log("Get climatisation state")
 
-        var now = new Date();
-        var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
+        if (this.lastRequest != undefined) {
+          var now = new Date();
+          var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
 
-        if (duration < 30) {
-          return callback(null, this.climatisationOn)
+          if (duration < 30) {
+            return callback(null, this.climatisationOn)
+          }
+          this.log("duration: " + duration)
         }
-
         this.lastRequest = new Date()
-
-        this.log("duration: " + duration)
 
         try {
           this.getCurrentState('cabin-heating').then((on) => {
@@ -72,7 +72,7 @@ class Climatisation implements AccessoryPlugin {
             this.log.error("Error: " + err.message)
             callback()
           })
-        } 
+        }
         catch (error: any) {
           this.log.error("Error: " + error)
           callback()
@@ -125,6 +125,7 @@ class Climatisation implements AccessoryPlugin {
     });
 
     python.stdout.on('data', (data) => {
+      this.log("DATA: " + data.toString())
       let parsed = JSON.parse(data)
       success = parsed.currentState == value
     });
@@ -153,6 +154,7 @@ class Climatisation implements AccessoryPlugin {
     });
 
     python.stdout.on('data', (data) => {
+      this.log("DATA: " + data.toString())
       let parsed = JSON.parse(data)
       if (command == 'cabin-heating') {
         currentState = parsed.cabinHeating
