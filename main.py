@@ -27,7 +27,7 @@ def getCabinHeatingStatus(vwc, vin):
 	climaterStatus = vwc.get_climater(vin)['climater']['status']
 	state = climaterStatus['climatisationStatusData']['climatisationState']['content'] == 'heating'
 
-	logger.debug("Climater status: " + json_helpers.to_json(climaterStatus, unpicklable=False))
+	logger.info("Climater status: " + json_helpers.to_json(climaterStatus, unpicklable=False))
 
 	return state
 	
@@ -37,7 +37,7 @@ def getLockedStatus(vwc, vin):
 	doors = pvsr.get('doors',[])
 	avdoors = {'left_front':'Left front', 'right_front':'Right front', 'left_rear':'Left rear', 'right_rear':'Right rear', 'trunk':'Trunk'}
 	
-	logger.debug("Doors status: " + json_helpers.to_json(doors, unpicklable=False))
+	logger.info("Doors status: " + json_helpers.to_json(doors, unpicklable=False))
 
 	for d in avdoors.items():
 		locked = doors.get('lock_'+d[0],'')
@@ -75,17 +75,17 @@ try:
 	if len(vin) == 0:
 		vin = vwc.get_real_car_data()['realCars'][0]['vehicleIdentificationNumber']
 		carStates[vin] = CarState()
-		logger.debug("VIN: " + vin)
+		logger.info("VIN: " + vin)
  
 	if command == 'locked':
 		isLocked = getLockedStatus(vwc, vin)
 
 		if value == '1' and not isLocked:
 			response = vwc.lock(vin, action='lock')
-			logger.debug(response)
+			logger.info(response)
 		elif value == '0' and isLocked:
 			response = vwc.lock(vin, action='unlock')
-			logger.debug(response)
+			logger.info(response)
 		elif value == 'status':
 			pass
 		else:
@@ -100,11 +100,11 @@ try:
 	
 		if value == '1':
 			on = vwc.climatisation_v2(vin, action='on', temperature=24.0)
-			logger.debug(on)
+			logger.info(on)
 			cabinHeatingStatus = True if (on['action']['actionState'] == 'queued' and on['action']['type'] == 'startClimatisation') else False
 		elif value == '0':
 			off = vwc.climatisation(vin, action='off')
-			logger.debug(off)
+			logger.info(off)
 			cabinHeatingStatus = True if (off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else False
 		elif value == 'status':
 			pass

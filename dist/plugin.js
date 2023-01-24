@@ -8,6 +8,11 @@ const child_process_1 = require("child_process");
 let hap;
 class Climatisation {
     constructor(log, config, api) {
+        this.name = "";
+        this.username = "";
+        this.password = "";
+        this.spin = "";
+        this.vin = "";
         this.lastRequest = undefined;
         this.climatisationOn = false;
         this.log = log;
@@ -16,6 +21,7 @@ class Climatisation {
         this.username = config['username'];
         this.password = config['password'];
         this.spin = config['spin'];
+        this.vin = config['vin'];
         this.lastRequest = undefined;
         this.fanService = new hap.Service.Fan(this.name);
         this.fanService.getCharacteristic(hap.Characteristic.On)
@@ -78,7 +84,7 @@ class Climatisation {
         this.log("Identify!");
     }
     async setCurrentState(command, value) {
-        let python = (0, child_process_1.spawn)((0, path_1.join)(__dirname, '/venv/bin/python3'), [(0, path_1.join)(__dirname, '../main.py'), this.username, this.password, this.spin, command, value]);
+        let python = (0, child_process_1.spawn)((0, path_1.join)(__dirname, '/venv/bin/python3'), [(0, path_1.join)(__dirname, '../main.py'), this.username, this.password, this.spin, command, value, this.vin]);
         let success = false;
         let error = null;
         let currentState = false;
@@ -120,7 +126,7 @@ class Climatisation {
         }), 10000, new Error(`Timed out setting state of ${command} to ${value}`));
     }
     async getCurrentState(command) {
-        let python = (0, child_process_1.spawn)((0, path_1.join)(__dirname, '/venv/bin/python3'), [(0, path_1.join)(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status']);
+        let python = (0, child_process_1.spawn)((0, path_1.join)(__dirname, '/venv/bin/python3'), [(0, path_1.join)(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status', this.vin]);
         let success = false;
         let error = null;
         let currentState = false;

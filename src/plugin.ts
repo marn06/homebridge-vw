@@ -25,10 +25,11 @@ export = (api: API) => {
 class Climatisation implements AccessoryPlugin {
   private readonly log: Logging
   private readonly config: AccessoryConfig
-  private readonly name: string
-  private readonly username: string
-  private readonly password: string
-  private readonly spin: string
+  private readonly name: string = ""
+  private readonly username: string = ""
+  private readonly password: string = ""
+  private readonly spin: string = ""
+  private readonly vin: string = ""
 
   private lastRequest: Date | undefined = undefined
   private climatisationOn = false
@@ -44,6 +45,7 @@ class Climatisation implements AccessoryPlugin {
     this.username = config['username']
     this.password = config['password']
     this.spin = config['spin']
+    this.vin = config['vin']
 
     this.lastRequest = undefined
 
@@ -119,7 +121,7 @@ class Climatisation implements AccessoryPlugin {
   }
 
   async setCurrentState(command: string, value: string): Promise<void> {
-    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, value])
+    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, value, this.vin])
 
     let success = false
     let error: string | null = null
@@ -168,7 +170,7 @@ class Climatisation implements AccessoryPlugin {
   }
 
   async getCurrentState(command: string): Promise<boolean> {
-    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status'])
+    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status', this.vin])
 
     let success = false
     let error: string | null = null
