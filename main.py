@@ -10,20 +10,6 @@ from credentials import Credentials
 
 from NativeAPI import WeConnect, VWError
 
-vin = ''
-
-if len(sys.argv) >= 6:
-	username = sys.argv[1]
-	password = sys.argv[2]
-	spin = sys.argv[3]
-	command = sys.argv[4]
-	value = sys.argv[5]
-else:
-	exit(1)
-
-if len(sys.argv) >= 7:
-	vin = sys.argv[6]
-
 def persistCarStates(carStates: CarStates):
 	with open('carStates.json', 'w', buffering=1) as outfile:
 		outfile.write(json_helpers.to_json(carStates, unpicklable=False))
@@ -63,9 +49,23 @@ def getLockedStatus(vwc, vin):
 		
 	return True
 
+if len(sys.argv) >= 6:
+	username = sys.argv[1]
+	password = sys.argv[2]
+	spin = sys.argv[3]
+	command = sys.argv[4]
+	value = sys.argv[5]
+else:
+	exit(1)
+
+vin = ''
+
+if len(sys.argv) >= 7:
+	vin = sys.argv[6]
+
 logging.basicConfig(format='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 
-logger = logging.getLogger('Middleware')
+logger = logging.getLogger('WeConnect')
 logger.setLevel(logging.INFO)
 
 carStates = getCarStates()

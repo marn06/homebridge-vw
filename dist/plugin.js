@@ -89,15 +89,20 @@ class Climatisation {
         python.stdout.on('data', (data) => {
             this.log("Data: " + data.toString());
             let parsed = JSON.parse(data);
-            success = parsed.currentState == value;
+            if (value == '1' && parsed.currentState == true) {
+                success = true;
+            }
+            else if (value == '0' && parsed.currentState == false) {
+                success = true;
+            }
         });
         return (0, timeoutPromise_1.default)(new Promise((resolve, reject) => {
             python.on('close', (code) => {
                 if (success) {
-                    this.lastRequest = undefined;
+                    this.lastRequest = undefined; // Force refresh when requesting state
                     resolve();
                     setTimeout(async () => {
-                        this.lastRequest = undefined;
+                        this.lastRequest = undefined; // Force refresh when requesting state
                         const state = await this.getCurrentState(command);
                         this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state);
                     }, 10000);
