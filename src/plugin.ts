@@ -70,15 +70,15 @@ class Climatisation implements AccessoryPlugin {
             this.climatisationOn = on
             log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null, this.climatisationOn)
-          }, (err) => {
-            if (err) {
-              this.log.error("Error: " + err.message)
+          }, (error) => {
+            if (error != undefined) {
+              this.log.error("Error: " + error)
             }
             callback()
           })
         }
-        catch (error: any) {
-          if (error) {
+        catch (error) {
+          if (error != undefined) {
             this.log.error("Error: " + error)
           }
           callback()
@@ -93,15 +93,15 @@ class Climatisation implements AccessoryPlugin {
             this.climatisationOn = (value == "1")
             log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null)
-          }, (err) => {
-            if (err) {
-              this.log.error("Error: " + err.message)
+          }, (error) => {
+            if (error != undefined) {
+              this.log.error("Error: " + error.message)
             }
             callback()
           })
         }
-        catch (error: any) {
-          if (error) {
+        catch (error) {
+          if (error != undefined) {
             this.log.error("Error: " + error)
           }
           callback() 
