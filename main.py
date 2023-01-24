@@ -100,11 +100,11 @@ try:
 	
 		if value == '1':
 			on = vwc.climatisation_v2(vin, action='on', temperature=24.0)
-			logger.error(on)
+			logger.debug(on)
 			cabinHeatingStatus = True if (on['action']['actionState'] == 'queued' and on['action']['type'] == 'startClimatisation') else False
 		elif value == '0':
 			off = vwc.climatisation(vin, action='off')
-			logger.error(off)
+			logger.debug(off)
 			cabinHeatingStatus = True if (off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else False
 		elif value == 'status':
 			pass

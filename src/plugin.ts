@@ -61,7 +61,7 @@ class Climatisation implements AccessoryPlugin {
             this.log("Multiple requests within 30 seconds")
             return callback(null, this.climatisationOn)
           }
-        }
+        } 
  
         this.lastRequest = new Date()
         
@@ -156,6 +156,7 @@ class Climatisation implements AccessoryPlugin {
           setTimeout(async () => {
             this.lastRequest = undefined
             const state = await this.getCurrentState(command)
+            console.log("State after 10 seconds: " + state)
             this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state)
           }, 10000)
         }

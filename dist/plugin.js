@@ -109,6 +109,7 @@ class Climatisation {
                     setTimeout(async () => {
                         this.lastRequest = undefined;
                         const state = await this.getCurrentState(command);
+                        console.log("State after 10 seconds: " + state);
                         this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state);
                     }, 10000);
                 }
