@@ -86,7 +86,7 @@ class Climatisation {
     async setCurrentState(command, value) {
         let python = (0, child_process_1.spawn)((0, path_1.join)(__dirname, '/venv/bin/python3'), [(0, path_1.join)(__dirname, '../main.py'), this.username, this.password, this.spin, command, value, this.vin]);
         let success = false;
-        let error = null;
+        let error = undefined;
         let currentState = false;
         python.stderr.on('data', (data) => {
             error = data;
@@ -112,15 +112,15 @@ class Climatisation {
                 if (success) {
                     this.lastRequest = undefined; // Force refresh with get status
                     resolve();
-                    /*           setTimeout(async () => {
-                                this.lastRequest = undefined
-                                const state = await this.getCurrentState(command)
-                                console.log("State after 10 seconds: " + state)
-                                this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state)
-                              }, 10000) */
+                    setTimeout(async () => {
+                        this.lastRequest = undefined;
+                        const state = await this.getCurrentState(command);
+                        console.log("State after 10 seconds: " + state);
+                        this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state);
+                    }, 10000);
                 }
                 else {
-                    reject(error);
+                    reject(new Error(error));
                 }
             });
         }), 10000, new Error(`Timed out setting state of ${command} to ${value}`));
@@ -128,7 +128,7 @@ class Climatisation {
     async getCurrentState(command) {
         let python = (0, child_process_1.spawn)((0, path_1.join)(__dirname, '/venv/bin/python3'), [(0, path_1.join)(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status', this.vin]);
         let success = false;
-        let error = null;
+        let error = undefined;
         let currentState = false;
         python.stderr.on('data', (data) => {
             error = data;
@@ -150,7 +150,7 @@ class Climatisation {
                     resolve(currentState);
                 }
                 else {
-                    reject(error);
+                    reject(new Error(error));
                 }
             });
         }), 10000, new Error(`Timed out getting state of ${command}`));

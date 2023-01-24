@@ -124,7 +124,7 @@ class Climatisation implements AccessoryPlugin {
     let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, value, this.vin])
 
     let success = false
-    let error: string | null = null
+    let error: string | undefined = undefined
     let currentState = false
 
     python.stderr.on('data', (data) => {
@@ -155,15 +155,15 @@ class Climatisation implements AccessoryPlugin {
           this.lastRequest = undefined // Force refresh with get status
           resolve()
 
-/*           setTimeout(async () => {
+          setTimeout(async () => {
             this.lastRequest = undefined
             const state = await this.getCurrentState(command)
             console.log("State after 10 seconds: " + state)
             this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state)
-          }, 10000) */
+          }, 10000)
         }
         else {
-          reject(error)
+          reject(new Error(error))
         }
       })
     }), 10000, new Error(`Timed out setting state of ${command} to ${value}`))
@@ -173,7 +173,7 @@ class Climatisation implements AccessoryPlugin {
     let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status', this.vin])
 
     let success = false
-    let error: string | null = null
+    let error: string | undefined = undefined
     let currentState = false
 
     python.stderr.on('data', (data) => {
@@ -190,7 +190,7 @@ class Climatisation implements AccessoryPlugin {
         currentState = parsed.locked
       }
       success = true
-    })
+    }) 
 
     return timeoutPromise(new Promise((resolve, reject) => {
       python.on('close', (code) => {
@@ -198,7 +198,7 @@ class Climatisation implements AccessoryPlugin {
           resolve(currentState)
         }
         else {
-          reject(error)
+          reject(new Error(error))
         }
       })
     }), 10000, new Error(`Timed out getting state of ${command}`))
