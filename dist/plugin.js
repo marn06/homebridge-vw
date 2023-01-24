@@ -25,6 +25,7 @@ class Climatisation {
                 var now = new Date();
                 var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
                 if (duration < 30) {
+                    this.log("Multiple requests within 30 seconds");
                     return callback(null, this.climatisationOn);
                 }
                 this.log("duration: " + duration);
@@ -138,6 +139,7 @@ class Climatisation {
             else if (command == 'locked') {
                 currentState = parsed.locked;
             }
+            this.log("Success: " + success);
             success = true;
         });
         return (0, timeoutPromise_1.default)(new Promise((resolve, reject) => {

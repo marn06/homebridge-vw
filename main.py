@@ -125,5 +125,3 @@ except VWError as e:
 		logger.error("Error: " + e.message)
 except Exception as e:
 	logger.error("Error: " + e)
-
- 

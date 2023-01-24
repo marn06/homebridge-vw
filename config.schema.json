@@ -14,7 +14,7 @@
             "username": {
                 "title": "Username",
                 "type": "string",
-                "default": "",
+                "default": "email",
                 "description": "Is the username (email) assigned to your WeConnect account",
                 "required": true
             },
@@ -22,19 +22,19 @@
                 "title": "VIN",
                 "type": "string",
                 "default": "",
-                "description": "VIN of the car, if empty VIN of first car will be used",
+                "description": "VIN of the car, if empty VIN of first car will be used"
             },
             "password": {
                 "title": "Password",
                 "type": "string",
-                "default": "",
+                "default": "password",
                 "description": "Is the password assigned to your WeConnect account",
                 "required": true
             },
             "spin": {
                 "title": "Spin",
                 "type": "string",
-                "default": "",
+                "default": "0000",
                 "description": "Spin is the 4 digit code assigned to your WeConnect account",
                 "required": true
             },
