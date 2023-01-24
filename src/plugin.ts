@@ -45,7 +45,7 @@ class Climatisation implements AccessoryPlugin {
     this.password = config['password']
     this.spin = config['spin']
 
-    this.lastRequest = new Date()
+    this.lastRequest = undefined
 
     this.fanService = new hap.Service.Fan(this.name)
 

@@ -16,7 +16,7 @@ class Climatisation {
         this.username = config['username'];
         this.password = config['password'];
         this.spin = config['spin'];
-        this.lastRequest = new Date();
+        this.lastRequest = undefined;
         this.fanService = new hap.Service.Fan(this.name);
         this.fanService.getCharacteristic(hap.Characteristic.On)
             .on("get" /* CharacteristicEventTypes.GET */, (callback) => {
