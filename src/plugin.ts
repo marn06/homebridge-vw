@@ -153,12 +153,12 @@ class Climatisation implements AccessoryPlugin {
           this.lastRequest = undefined // Force refresh with get status
           resolve()
 
-          setTimeout(async () => {
+/*           setTimeout(async () => {
             this.lastRequest = undefined
             const state = await this.getCurrentState(command)
             console.log("State after 10 seconds: " + state)
             this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state)
-          }, 10000)
+          }, 10000) */
         }
         else {
           reject(error)
