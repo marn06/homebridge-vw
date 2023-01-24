@@ -120,8 +120,9 @@ class Climatisation implements AccessoryPlugin {
   async setCurrentState(command: string, value: string): Promise<void> {
     let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, value]);
 
+    let success = false
     let error: string | null = null
-    let success: boolean = false
+    let currentState = false
 
     python.stderr.on('data', (data) => {
       error = data
@@ -131,10 +132,17 @@ class Climatisation implements AccessoryPlugin {
     python.stdout.on('data', (data) => {
       this.log("Data: " + data.toString())
       let parsed = JSON.parse(data)
-      if (value == '1' && parsed.currentState == true) {
+      if (command == 'cabin-heating') {
+        currentState = parsed.cabinHeating
+      }
+      else if (command == 'locked') {
+        currentState = parsed.locked
+      }
+
+      if (value == '1' && currentState) {
         success = true
       }
-      else if (value == '0' && parsed.currentState == false) {
+      else if (value == '0' && !currentState) {
         success = true
       }
     });
@@ -142,11 +150,11 @@ class Climatisation implements AccessoryPlugin {
     return timeoutPromise(new Promise((resolve, reject) => {
       python.on('close', (code) => {
         if (success) {
-          this.lastRequest = undefined // Force refresh when requesting state
+          this.lastRequest = undefined // Force refresh with get status
           resolve()
 
           setTimeout(async () => {
-            this.lastRequest = undefined // Force refresh when requesting state
+            this.lastRequest = undefined
             const state = await this.getCurrentState(command)
             this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state)
           }, 10000)
