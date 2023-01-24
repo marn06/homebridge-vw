@@ -46,7 +46,7 @@ def getCabinHeatingStatus(vwc, vin):
 	if (state):
 		return 1
 	else:
-		return 0
+		return 0 
 	
 def getLockedStatus(vwc, vin):
 	vsr = vwc.get_vsr(vin)
@@ -88,6 +88,10 @@ try:
 		elif value == '0':
 			if isLocked:
 				vwc.lock(vin, action='unlock')
+		elif value == 'status':
+			pass
+		else:
+			print('command: ' + command + ' unknown value: ' + value)
 
 		carStates[vin].locked = '1' if isLocked else '0'
 		print(json_helpers.to_json(carStates[vin], unpicklable=False))
@@ -97,10 +101,16 @@ try:
 	
 		if value == '1':
 			on = vwc.climatisation_v2(vin, action='on', temperature=24.0)
+			logger.error(on)
 			cabinHeatingStatus = '1' if (on['action']['actionState'] == 'queued' and on['action']['type'] == 'startClimatisation') else '0'
 		elif value == '0':
 			off = vwc.climatisation(vin, action='off')
+			logger.error(off)
 			cabinHeatingStatus = '0' if (off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else '1'
+		elif value == 'status':
+			pass
+		else:
+			print('command: ' + command + ' unknown value: ' + value)
 
 		carStates[vin].cabinHeating = cabinHeatingStatus
 		print(json_helpers.to_json(carStates[vin], unpicklable=False))

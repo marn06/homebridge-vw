@@ -48,7 +48,7 @@ class Climatisation {
             .on("set" /* CharacteristicEventTypes.SET */, (value, callback) => {
             this.log(`Set climatisation state ${value}`);
             try {
-                this.setCurrentState('cabin-heating', value.toString()).then(() => {
+                this.setCurrentState('cabin-heating', value == true ? '1' : '0').then(() => {
                     this.climatisationOn = (value == "1");
                     log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"));
                     callback(null);
