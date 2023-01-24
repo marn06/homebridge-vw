@@ -129,7 +129,7 @@ class Climatisation implements AccessoryPlugin {
     });
 
     python.stdout.on('data', (data) => {
-      this.log("DATA: " + data.toString())
+      this.log("Data: " + data.toString())
       let parsed = JSON.parse(data)
       success = parsed.currentState == value
     });
@@ -137,7 +137,14 @@ class Climatisation implements AccessoryPlugin {
     return timeoutPromise(new Promise((resolve, reject) => {
       python.on('close', (code) => {
         if (success) {
+          this.lastRequest = undefined
           resolve()
+
+          setTimeout(async () => {
+            this.lastRequest = undefined
+            const state = await this.getCurrentState(command)
+            this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state)
+          }, 10000)
         }
         else {
           reject(error)
@@ -159,7 +166,7 @@ class Climatisation implements AccessoryPlugin {
     });
 
     python.stdout.on('data', (data) => {
-      this.log("DATA: " + data.toString())
+      this.log("Data: " + data.toString())
       let parsed = JSON.parse(data)
       if (command == 'cabin-heating') {
         currentState = parsed.cabinHeating
