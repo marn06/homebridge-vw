@@ -48,6 +48,7 @@ class Climatisation implements AccessoryPlugin {
     this.lastRequest = new Date()
 
     this.fanService = new hap.Service.Fan(this.name)
+    
     this.fanService.getCharacteristic(hap.Characteristic.On)
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
         this.log("Get climatisation state")
@@ -60,8 +61,8 @@ class Climatisation implements AccessoryPlugin {
             this.log("Multiple requests within 30 seconds")
             return callback(null, this.climatisationOn)
           }
-          this.log("duration: " + duration)
         }
+
         this.lastRequest = new Date()
 
         try {
@@ -77,7 +78,9 @@ class Climatisation implements AccessoryPlugin {
           })
         }
         catch (error: any) {
-          this.log.error("Error: " + error)
+          if (error) {
+            this.log.error("Error: " + error)
+          }
           callback()
         }
       })
@@ -98,8 +101,10 @@ class Climatisation implements AccessoryPlugin {
           })
         }
         catch (error: any) {
-          this.log.error("Error: " + error)
-          callback()
+          if (error) {
+            this.log.error("Error: " + error)
+          }
+          callback() 
         }
       })
 

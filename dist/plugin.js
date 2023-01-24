@@ -28,7 +28,6 @@ class Climatisation {
                     this.log("Multiple requests within 30 seconds");
                     return callback(null, this.climatisationOn);
                 }
-                this.log("duration: " + duration);
             }
             this.lastRequest = new Date();
             try {
@@ -44,7 +43,9 @@ class Climatisation {
                 });
             }
             catch (error) {
-                this.log.error("Error: " + error);
+                if (error) {
+                    this.log.error("Error: " + error);
+                }
                 callback();
             }
         })
@@ -63,7 +64,9 @@ class Climatisation {
                 });
             }
             catch (error) {
-                this.log.error("Error: " + error);
+                if (error) {
+                    this.log.error("Error: " + error);
+                }
                 callback();
             }
         });
