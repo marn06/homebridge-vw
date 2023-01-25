@@ -1,13 +1,13 @@
 {
-    "pluginAlias": "Climatisation",
+    "pluginAlias": "WeConnect",
     "pluginType": "accessory",
-    "singular": true,
+    "singular": false,
     "schema": {
         "type": "object",
         "properties": {
             "name": {
                 "title": "Name",
-                "default": "VW Climatisation",
+                "default": "VW ID.4",
                 "type": "string",
                 "required": true
             },

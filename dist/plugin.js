@@ -6,7 +6,7 @@ const timeoutPromise_1 = __importDefault(require("./timeoutPromise"));
 const path_1 = require("path");
 const child_process_1 = require("child_process");
 let hap;
-class Climatisation {
+class WeConnect {
     constructor(log, config, api) {
         this.name = "";
         this.username = "";
@@ -15,6 +15,7 @@ class Climatisation {
         this.vin = "";
         this.lastRequest = undefined;
         this.climatisationOn = false;
+        this.locked = false;
         this.log = log;
         this.name = config.name;
         this.config = config;
@@ -23,8 +24,54 @@ class Climatisation {
         this.spin = config['spin'];
         this.vin = config['vin'];
         this.lastRequest = undefined;
-        this.fanService = new hap.Service.Fan(this.name);
-        this.fanService.getCharacteristic(hap.Characteristic.On)
+        this.climatisationService = new hap.Service.Fan(this.name);
+        this.lockService = new hap.Service.Switch(this.name);
+        this.lockService.getCharacteristic(hap.Characteristic.On)
+            .on("get" /* CharacteristicEventTypes.GET */, (callback) => {
+            this.log("Get locked state");
+            if (this.lastRequest != undefined) {
+                var now = new Date();
+                var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000;
+                if (duration < 30) {
+                    this.log("Multiple requests within 30 seconds");
+                    return callback(null, this.locked);
+                }
+            }
+            this.lastRequest = new Date();
+            try {
+                this.getCurrentState('locked').then((isLocked) => {
+                    this.locked = isLocked;
+                    callback(null, this.locked);
+                }, (error) => {
+                    this.log.error("Get Error: " + error);
+                    callback();
+                });
+            }
+            catch (error) {
+                this.log.error("Try Get Error: " + error);
+                callback();
+            }
+        })
+            .on("set" /* CharacteristicEventTypes.SET */, (value, callback) => {
+            this.log(`Set locked state ${value}`);
+            try {
+                this.setCurrentState('locked', value == true ? '1' : '0').then(() => {
+                    this.locked = (value == "1");
+                    callback(null);
+                }, (error) => {
+                    this.log.error("Set Error: " + error.message);
+                    setTimeout(() => {
+                        this.lockService.getCharacteristic(hap.Characteristic.On).updateValue(false);
+                    }, 1000); // Go back to turned off if error
+                    callback(null);
+                });
+            }
+            catch (error) {
+                this.log.error("Try Set Error: " + error);
+                callback(); // Unresponsive
+            }
+        });
+        this.climatisationService.getCharacteristic(hap.Characteristic.On)
             .on("get" /* CharacteristicEventTypes.GET */, (callback) => {
             this.log("Get climatisation state");
             if (this.lastRequest != undefined) {
@@ -39,7 +86,6 @@ class Climatisation {
             try {
                 this.getCurrentState('cabin-heating').then((on) => {
                     this.climatisationOn = on;
-                    log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"));
                     callback(null, this.climatisationOn);
                 }, (error) => {
                     this.log.error("Get Error: " + error);
@@ -61,20 +107,20 @@ class Climatisation {
                 }, (error) => {
                     this.log.error("Set Error: " + error.message);
                     setTimeout(() => {
-                        this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(false);
-                    }, 1000);
+                        this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(false);
+                    }, 1000); // Go back to turned off if error
                     callback(null);
                 });
             }
             catch (error) {
                 this.log.error("Try Set Error: " + error);
-                callback();
+                callback(); // Unresponsive
             }
         });
         this.informationService = new hap.Service.AccessoryInformation()
             .setCharacteristic(hap.Characteristic.Manufacturer, config.manufacturer)
             .setCharacteristic(hap.Characteristic.Model, config.model);
-        this.log("Climatisation finished initializing!");
+        this.log("WeConnect finished initializing!");
     }
     /*
      * This method is optional to implement. It is called when HomeKit ask to identify the accessory.
@@ -116,7 +162,7 @@ class Climatisation {
                         this.lastRequest = undefined;
                         const state = await this.getCurrentState(command);
                         console.log("State after 10 seconds: " + state);
-                        this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state);
+                        this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state);
                     }, 10000);
                 }
                 else {
@@ -162,12 +208,13 @@ class Climatisation {
     getServices() {
         return [
             this.informationService,
-            this.fanService,
+            this.climatisationService,
+            this.lockService
         ];
     }
 }
 module.exports = (api) => {
     hap = api.hap;
-    api.registerAccessory("homebridge-vw", "Climatisation", Climatisation);
+    api.registerAccessory("homebridge-vw", "WeConnect", WeConnect);
 };
 //# sourceMappingURL=plugin.js.map

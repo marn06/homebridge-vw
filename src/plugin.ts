@@ -19,10 +19,10 @@ let hap: HAP
 
 export = (api: API) => {
   hap = api.hap
-  api.registerAccessory("homebridge-vw", "Climatisation", Climatisation)
+  api.registerAccessory("homebridge-vw", "WeConnect", WeConnect)
 }
 
-class Climatisation implements AccessoryPlugin {
+class WeConnect implements AccessoryPlugin {
   private readonly log: Logging
   private readonly config: AccessoryConfig
   private readonly name: string = ""
@@ -33,8 +33,10 @@ class Climatisation implements AccessoryPlugin {
 
   private lastRequest: Date | undefined = undefined
   private climatisationOn = false
+  private locked = false
 
-  private readonly fanService: Service
+  private readonly climatisationService: Service
+  private readonly lockService: Service
   private readonly informationService: Service
   constructor(log: Logging, config: AccessoryConfig, api: API) {
 
@@ -49,16 +51,68 @@ class Climatisation implements AccessoryPlugin {
 
     this.lastRequest = undefined
 
-    this.fanService = new hap.Service.Fan(this.name)
+    this.climatisationService = new hap.Service.Fan(this.name)
+    this.lockService = new hap.Service.Switch(this.name)
 
-    this.fanService.getCharacteristic(hap.Characteristic.On)
+    this.lockService.getCharacteristic(hap.Characteristic.On)
+      .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
+        this.log("Get locked state")
+        
+        if (this.lastRequest != undefined) {
+          var now = new Date()
+          var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000
+ 
+          if (duration < 30) {
+            this.log("Multiple requests within 30 seconds")
+            return callback(null, this.locked)
+          }
+        } 
+ 
+        this.lastRequest = new Date()
+        
+        try {
+          this.getCurrentState('locked').then((isLocked) => {
+            this.locked = isLocked
+            callback(null, this.locked)
+          }, (error) => {
+            this.log.error("Get Error: " + error)
+            callback()
+          })
+        }
+        catch (error) {
+          this.log.error("Try Get Error: " + error)
+          callback()
+        }
+      })
+      .on(CharacteristicEventTypes.SET, (value: CharacteristicValue, callback: CharacteristicSetCallback) => {
+        this.log(`Set locked state ${value}`)
+
+        try {
+          this.setCurrentState('locked', value == true ? '1' : '0').then(() => {
+            this.locked = (value == "1")
+            callback(null)
+          }, (error) => {
+            this.log.error("Set Error: " + error.message)
+            setTimeout(() => {
+              this.lockService.getCharacteristic(hap.Characteristic.On).updateValue(false)
+            }, 1000); // Go back to turned off if error
+            callback(null)
+          })
+        }
+        catch (error) {
+          this.log.error("Try Set Error: " + error)
+          callback() // Unresponsive
+        }
+      })
+ 
+    this.climatisationService.getCharacteristic(hap.Characteristic.On)
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
         this.log("Get climatisation state")
         
         if (this.lastRequest != undefined) {
           var now = new Date()
           var duration = (now.valueOf() - this.lastRequest.valueOf()) / 10000
-
+ 
           if (duration < 30) {
             this.log("Multiple requests within 30 seconds")
             return callback(null, this.climatisationOn)
@@ -70,7 +124,6 @@ class Climatisation implements AccessoryPlugin {
         try {
           this.getCurrentState('cabin-heating').then((on) => {
             this.climatisationOn = on
-            log.info("Climatisation " + (this.climatisationOn ? "ON" : "OFF"))
             callback(null, this.climatisationOn)
           }, (error) => {
             this.log.error("Get Error: " + error)
@@ -94,14 +147,14 @@ class Climatisation implements AccessoryPlugin {
           }, (error) => {
             this.log.error("Set Error: " + error.message)
             setTimeout(() => {
-              this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(false)
-            }, 1000);
+              this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(false)
+            }, 1000); // Go back to turned off if error
             callback(null)
           })
         }
         catch (error) {
           this.log.error("Try Set Error: " + error)
-          callback()
+          callback() // Unresponsive
         }
       })
 
@@ -109,7 +162,7 @@ class Climatisation implements AccessoryPlugin {
       .setCharacteristic(hap.Characteristic.Manufacturer, config.manufacturer)
       .setCharacteristic(hap.Characteristic.Model, config.model)
 
-    this.log("Climatisation finished initializing!")
+    this.log("WeConnect finished initializing!")
   }
 
   /*
@@ -159,7 +212,7 @@ class Climatisation implements AccessoryPlugin {
             this.lastRequest = undefined
             const state = await this.getCurrentState(command)
             console.log("State after 10 seconds: " + state)
-            this.fanService.getCharacteristic(hap.Characteristic.On).updateValue(state)
+            this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
           }, 10000)
         }
         else {
@@ -211,7 +264,8 @@ class Climatisation implements AccessoryPlugin {
   getServices(): Service[] {
     return [
       this.informationService,
-      this.fanService,
+      this.climatisationService,
+      this.lockService
     ]
   }
 }
