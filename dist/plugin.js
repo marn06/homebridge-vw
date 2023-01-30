@@ -8,7 +8,7 @@ const child_process_1 = require("child_process");
 let hap;
 class WeConnect {
     constructor(log, config, api) {
-        this.name = "";
+        this.name = "WeConnect";
         this.climaterName = "Climatisation";
         this.lockName = "Doors";
         this.username = "";

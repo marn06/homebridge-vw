@@ -12,7 +12,7 @@
 
 ## Description
 
-This [homebridge](https://github.com/homebridge/homebridge) plugin exposes a Fan (climatisation) and a Switch (lock/unlock car) to Apple's [HomeKit](http://www.apple.com/ios/home/).
+This [homebridge](https://github.com/homebridge/homebridge) plugin exposes a Fan (climatisation) and a Lock (lock/unlock car) to Apple's [HomeKit](http://www.apple.com/ios/home/).
 
 ## Installation
 
@@ -25,11 +25,12 @@ This [homebridge](https://github.com/homebridge/homebridge) plugin exposes a Fan
 ```json
 "accessories": [
      {
-       "accessory": "Climatisation",
-       "name": "VW Climatisation",
-       "username": "email@domain.com",
-       "password": "password",
-       "spin": "0000"
+        "name": "VW ID.4",
+        "username": "email@domain.com",
+        "password": "password",
+        "spin": "0000",
+        "vin": "WVWZZZ3CZLE0000000",
+        "accessory": "WeConnect"
      }
 ]
 ```
@@ -37,17 +38,18 @@ This [homebridge](https://github.com/homebridge/homebridge) plugin exposes a Fan
 ### Core
 | Key | Description | Default |
 | --- | --- | --- |
-| `accessory` | Must be `Climatisation` | N/A |
-| `name` | Name to appear in the Home app | N/A |
+| `accessory` | Must be `WeConnect` | N/A |
+| `name` | Name of Accessory to appear in the Home app | WeConnect |
+| `lockName` | Name of Lock service to appear in the Home app | Doors |
+| `climaterName` | Name of Fan service to appear in the Home app | Climatisation |
 | `username` | Is the username (email) assigned to your WeConnect account | N/A |
 | `password` | Is the password assigned to your WeConnect account | N/A |
 | `spin` | Spin is the 4 digit code assigned to your WeConnect account | N/A |
+| `vin` | VIN of the car, if empty VIN of first car will be used | N/A |
+| `pollInterval` | Time (in seconds) before next poll can occur per Service | `30` |
 
 ### Additional options
 | Key | Description | Default |
 | --- | --- | --- |
-| `pollInterval` | Time (in seconds) between device polls | `300` |
 | `model` | Appears under the _Model_ field for the accessory | plugin |
-| `serial` | Appears under the _Serial_ field for the accessory | apiroute |
 | `manufacturer` | Appears under the _Manufacturer_ field for the accessory | author |
-| `firmware` | Appears under the _Firmware_ field for the accessory | version |

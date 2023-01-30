@@ -26,7 +26,7 @@ export = (api: API) => {
 class WeConnect implements AccessoryPlugin {
   private readonly log: Logging
   private readonly config: AccessoryConfig
-  private readonly name: string = ""
+  private readonly name: string = "WeConnect"
   private readonly climaterName: string = "Climatisation"
   private readonly lockName: string = "Doors"
   private readonly username: string = ""

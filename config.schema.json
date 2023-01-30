@@ -7,7 +7,7 @@
         "properties": {
             "name": {
                 "title": "Name",
-                "default": "VW ID.4",
+                "default": "WeConnect",
                 "type": "string",
                 "required": true
             },
