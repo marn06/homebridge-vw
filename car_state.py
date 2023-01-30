@@ -1,6 +1,6 @@
 class CarState:
-    cabinHeating = None
+    climatisation = None
     locked = None
-    def __init__(self, cabinHeating: int=None, locked: int=None):
-        self.cabinHeating = cabinHeating
+    def __init__(self, climatisation: int=None, locked: int=None):
+        self.climatisation = climatisation
         self.locked = locked 

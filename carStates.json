@@ -1,1 +1,1 @@
-{"WVWZZZ3CZLE109370": {"cabinHeating": false, "locked": false}}
+{"WVWZZZ3CZLE109370": {"py/object": "car_state.CarState", "climatisation": null, "locked": true}, "WVWZZZ3CZLE109371": {"py/object": "car_state.CarState", "climatisation": null, "locked": true}}

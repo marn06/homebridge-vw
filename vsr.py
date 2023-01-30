@@ -23,6 +23,7 @@ class VSR:
         ('0x0204FFFFFF', '0x0204040002', 'oil_level', 'minimum_warning'),
         ('0x0204FFFFFF', '0x0204040003', 'oil_level', 'dipstick_percentage'),
         ('0x0204FFFFFF', '0x0204040004', 'oil_level', 'display'),
+        ('0x0204FFFFFF', '0x0204040006', 'oil_level', 'percentage'),
         ('0x0204FFFFFF', '0x02040C0001', 'intervals', 'ad_blue_range'),
         ('0x0301FFFFFF', '0x0301010001', 'status', 'parking_light', {'1':'on','2':'off'}),
         ('0x0301FFFFFF', '0x0301020001', 'status', 'temperature_outside'),

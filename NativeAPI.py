@@ -689,7 +689,6 @@ class WeConnect():
 			'action': {
 				'type': 'startWindowHeating' if action.lower() == 'on' else 'stopWindowHeating'
 				}
-				
 			}
 		secure_token = self.__request_secure_token(vin, 'rclima_v1/operations/P_START_CLIMA_AU')
 		r = self.__command('/bs/climatisation/v1/{brand}/{country}/vehicles/'+vin+'/climater/actions', dashboard=self.__get_fal_url(vin), post=data, scope=self.__oauth['sc2:fal'], accept=self.__accept_mbb, secure_token=secure_token)

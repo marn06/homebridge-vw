@@ -1,0 +1,72 @@
+[30/01/2023 11:44:08] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:44:09] [WeConnect::INFO] Doors status: {"lock_left_front": "closed", "open_left_front": "closed", "lock_left_rear": "closed", "open_left_rear": "closed", "lock_right_front": "closed", "open_right_front": "closed", "lock_right_rear": "closed", "open_right_rear": "closed", "lock_trunk": "closed", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 11:44:10] [WeConnect::INFO] {'rluActionResponse': {'requestId': 866731593, 'vin': 'WVWZZZ3CZLE109370'}}
+[30/01/2023 11:44:10] [WeConnect::INFO] So far
+[30/01/2023 11:44:10] [WeConnect::ERROR] Fatal Error: 'CarState' object does not support item assignment
+[30/01/2023 11:49:23] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:49:24] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 11:49:24] [WeConnect::INFO] So far
+[30/01/2023 11:49:24] [WeConnect::ERROR] Fatal Error: 'CarState' object does not support item assignment
+[30/01/2023 11:50:38] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:50:38] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 11:50:38] [WeConnect::INFO] So far
+[30/01/2023 11:50:38] [WeConnect::ERROR] Fatal Error: 'CarState' object does not support item assignment
+[30/01/2023 11:53:36] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:53:43] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:53:56] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:54:13] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:54:54] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:55:07] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:55:08] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 11:55:08] [WeConnect::ERROR] Fatal Error: 'CarState' object does not support item assignment
+[30/01/2023 11:55:36] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:55:37] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 11:55:49] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 11:55:49] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:00:49] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 12:00:50] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:02:36] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 12:02:36] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:02:44] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 12:02:45] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:05:28] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:05:28] [WeConnect::ERROR] Fatal Error: 'dict' object has no attribute 'locked'
+[30/01/2023 12:05:53] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:05:53] [WeConnect::ERROR] Fatal Error: 'dict' object has no attribute 'locked'
+[30/01/2023 12:06:02] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:06:02] [WeConnect::ERROR] Fatal Error: 'dict' object has no attribute 'locked'
+[30/01/2023 12:06:23] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:06:23] [WeConnect::ERROR] Fatal Error: 'dict' object has no attribute 'locked'
+[30/01/2023 12:11:45] [WeConnect::ERROR] Fatal Error: 'vin'
+[30/01/2023 12:12:00] [WeConnect::ERROR] Fatal Error: 'vin'
+[30/01/2023 12:16:55] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 12:17:17] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 12:19:05] [WeConnect::ERROR] Fatal Error: 'CarStates' object does not support item assignment
+[30/01/2023 12:19:17] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:19:17] [WeConnect::ERROR] Fatal Error: 'CarStates' object is not subscriptable
+[30/01/2023 12:19:41] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:19:41] [WeConnect::ERROR] Fatal Error: 'CarStates' object is not subscriptable
+[30/01/2023 12:20:21] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:20:21] [WeConnect::ERROR] Fatal Error: 'CarStates' object is not subscriptable
+[30/01/2023 12:20:31] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:20:54] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:20:54] [WeConnect::ERROR] Fatal Error: 'CarStates' object is not iterable
+[30/01/2023 12:23:06] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:23:06] [WeConnect::ERROR] Fatal Error: 'WVWZZZ3CZLE109370'
+[30/01/2023 12:23:19] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:23:19] [WeConnect::ERROR] Fatal Error: 'WVWZZZ3CZLE109370'
+[30/01/2023 12:26:07] [WeConnect::ERROR] Fatal Error: 'WVWZZZ3CZLE109370'
+[30/01/2023 12:26:16] [WeConnect::ERROR] Fatal Error: 'WVWZZZ3CZLE109370'
+[30/01/2023 12:27:20] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:27:20] [WeConnect::ERROR] Fatal Error: 'CarState' object does not support item assignment
+[30/01/2023 12:27:36] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:27:36] [WeConnect::ERROR] Fatal Error: 'CarState' object does not support item assignment
+[30/01/2023 12:27:39] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 12:27:40] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:27:40] [WeConnect::ERROR] Fatal Error: 'CarState' object does not support item assignment
+[30/01/2023 12:28:03] [WeConnect::INFO] VIN: WVWZZZ3CZLE109370
+[30/01/2023 12:28:04] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}
+[30/01/2023 12:28:14] [WeConnect::ERROR] VWError: Error 404: [mbbc.registrationserver.sopCalculationFailed] Could not calculate the SOP for vin=WVWZZZ3CZLE109371
+[30/01/2023 12:28:46] [WeConnect::ERROR] Fatal Error: name 'isLocked' is not defined
+[30/01/2023 12:43:35] [WeConnect::ERROR] VWError: Error 404: [mbbc.registrationserver.sopCalculationFailed] Could not calculate the SOP for vin=WVWZZZ3CZLE109371
+[30/01/2023 12:43:42] [WeConnect::INFO] Doors status: {"lock_left_front": "locked", "open_left_front": "closed", "lock_left_rear": "locked", "open_left_rear": "closed", "lock_right_front": "locked", "open_right_front": "closed", "lock_right_rear": "locked", "open_right_rear": "closed", "lock_trunk": "locked", "open_trunk": "closed", "lock_hood": "closed", "open_hood": "closed"}

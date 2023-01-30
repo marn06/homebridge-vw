@@ -11,6 +11,16 @@
                 "type": "string",
                 "required": true
             },
+            "climaterName": {
+                "title": "Name",
+                "default": "Climatisation",
+                "type": "string"
+            },
+            "lockName": {
+                "title": "Name",
+                "default": "Doors",
+                "type": "string"
+            },
             "username": {
                 "title": "Username",
                 "type": "string",

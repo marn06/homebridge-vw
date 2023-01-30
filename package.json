@@ -1,12 +1,12 @@
 {
   "name": "homebridge-vw",
   "displayName": "Homebridge VW",
-  "version": "0.0.67-alpha",
+  "version": "0.0.68-alpha",
   "description": "Homebridge plugin for VW We Connect",
   "main": "dist/plugin.js",
   "devDependencies": {
     "@types/node": "^18.11.18",
-    "copyfiles": "^2.4.1", 
+    "copyfiles": "^2.4.1",
     "homebridge": "^1.0.4",
     "rimraf": "^3.0.2",
     "typescript": "^4.9.4"
@@ -26,10 +26,10 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/marn06/homebridge-vw.git"
-  }, 
+  },
   "keywords": [
     "homebridge-plugin"
-  ], 
+  ],
   "author": "marn06",
   "license": "MIT",
   "bugs": {
