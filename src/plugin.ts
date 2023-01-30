@@ -27,8 +27,8 @@ class WeConnect implements AccessoryPlugin {
   private readonly log: Logging
   private readonly config: AccessoryConfig
   private readonly name: string = ""
-  private readonly climaterName: string = ""
-  private readonly lockName: string = ""
+  private readonly climaterName: string = "Climatisation"
+  private readonly lockName: string = "Doors"
   private readonly username: string = ""
   private readonly password: string = ""
   private readonly spin: string = ""
@@ -48,8 +48,8 @@ class WeConnect implements AccessoryPlugin {
     this.config = config
 
     this.name = config.name
-    this.climaterName = config['climaterName'] = "Climatisation"
-    this.lockName = config['lockName'] = "Doors"
+    this.climaterName = config['climaterName']
+    this.lockName = config['lockName']
     this.username = config['username']
     this.password = config['password']
     this.spin = config['spin']
@@ -76,8 +76,9 @@ class WeConnect implements AccessoryPlugin {
 
           if (duration < 30) {
             this.log("Multiple requests within 30 seconds")
-            this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(this.locked)
-            return this.locked
+            const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
+            this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState)
+            return lockState
           }
         }
 
@@ -86,8 +87,6 @@ class WeConnect implements AccessoryPlugin {
         try {
           await this.getCurrentState('locked').then((isLocked) => {
             this.locked = isLocked
-            this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(this.locked)
-            return this.locked
           }, (error) => {
             this.log.error("Get Error: " + error)
           })
@@ -95,7 +94,9 @@ class WeConnect implements AccessoryPlugin {
         catch (error) {
           this.log.error("Try Get Error: " + error)
         }
-        return false
+        const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
+        this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState)
+        return lockState
       })
 
     this.lockService.getCharacteristic(hap.Characteristic.LockTargetState)

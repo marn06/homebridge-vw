@@ -9,8 +9,8 @@ let hap;
 class WeConnect {
     constructor(log, config, api) {
         this.name = "";
-        this.climaterName = "";
-        this.lockName = "";
+        this.climaterName = "Climatisation";
+        this.lockName = "Doors";
         this.username = "";
         this.password = "";
         this.spin = "";
@@ -22,8 +22,8 @@ class WeConnect {
         this.log = log;
         this.config = config;
         this.name = config.name;
-        this.climaterName = config['climaterName'] = "Climatisation";
-        this.lockName = config['lockName'] = "Doors";
+        this.climaterName = config['climaterName'];
+        this.lockName = config['lockName'];
         this.username = config['username'];
         this.password = config['password'];
         this.spin = config['spin'];
@@ -46,16 +46,15 @@ class WeConnect {
                 var duration = (now.valueOf() - this.lastLockedRequest.valueOf()) / 10000;
                 if (duration < 30) {
                     this.log("Multiple requests within 30 seconds");
-                    this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(this.locked);
-                    return this.locked;
+                    const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED;
+                    this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState);
+                    return lockState;
                 }
             }
             this.lastLockedRequest = new Date();
             try {
                 await this.getCurrentState('locked').then((isLocked) => {
                     this.locked = isLocked;
-                    this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(this.locked);
-                    return this.locked;
                 }, (error) => {
                     this.log.error("Get Error: " + error);
                 });
@@ -63,7 +62,9 @@ class WeConnect {
             catch (error) {
                 this.log.error("Try Get Error: " + error);
             }
-            return false;
+            const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED;
+            this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState);
+            return lockState;
         });
         this.lockService.getCharacteristic(hap.Characteristic.LockTargetState)
             .onSet(async (value) => {
