@@ -5,6 +5,7 @@
   "description": "Homebridge plugin for VW We Connect",
   "main": "dist/plugin.js",
   "devDependencies": {
+    "@types/node": "^18.11.18",
     "copyfiles": "^2.4.1",
     "homebridge": "^1.0.4",
     "rimraf": "^3.0.2",
@@ -18,7 +19,7 @@
     "clean": "rimraf ./dist",
     "python": "python3 -m venv dist/venv && dist/venv/bin/pip3 install beautifulsoup4 jsonpickle requests xmltodict",
     "build": "rimraf ./dist && tsc",
-    "postinstall": "sh ./install.sh",
+    "postinstall": "node postinstall.js",
     "deploy": "npm run build && git add . && git commit . -m release && git push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -34,8 +35,5 @@
   "bugs": {
     "url": "https://github.com/marn06/homebridge-vw/issues"
   },
-  "homepage": "https://github.com/marn06/homebridge-vw#readme",
-  "dependencies": {
-    "@types/node": "^18.11.18"
-  }
+  "homepage": "https://github.com/marn06/homebridge-vw#readme"
 }
