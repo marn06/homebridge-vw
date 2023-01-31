@@ -2,10 +2,8 @@ import {
   AccessoryConfig,
   AccessoryPlugin,
   API,
-  Characteristic,
   CharacteristicEventTypes,
   CharacteristicGetCallback,
-  CharacteristicSetCallback,
   CharacteristicValue,
   HAP,
   Logging,
@@ -15,6 +13,8 @@ import {
 import timeoutPromise from "./timeoutPromise"
 import { join } from 'path'
 import { spawn } from 'child_process'
+
+const packageJson = require('./package.json')
 
 let hap: HAP
 
@@ -34,6 +34,10 @@ class WeConnect implements AccessoryPlugin {
   private readonly spin: string = ""
   private readonly vin: string = ""
 
+  private readonly manufacturer: string = ""
+  private readonly model: string = ""
+  private readonly serial: string = ""
+
   private lastClimatisationRequest: Date | undefined = undefined
   private lastLockedRequest: Date | undefined = undefined
   private climatisationOn = false
@@ -48,12 +52,16 @@ class WeConnect implements AccessoryPlugin {
     this.config = config
 
     this.name = config.name
-    this.climaterName = config['climaterName']
-    this.lockName = config['lockName']
+    this.climaterName = config['climaterName'] || "Climatisation"
+    this.lockName = config['lockName'] || "Doors"
     this.username = config['username']
     this.password = config['password']
     this.spin = config['spin']
     this.vin = config['vin']
+
+    this.manufacturer = config['manufacturer'] || packageJson['author']
+    this.model = config['model'] || packageJson['name']
+    this.serial = config['serial'] || packageJson['verson']
 
     this.climatisationService = new hap.Service.Fan(this.name)
     this.climatisationService.getCharacteristic(hap.Characteristic.ConfiguredName)
@@ -176,8 +184,9 @@ class WeConnect implements AccessoryPlugin {
       })
 
     this.informationService = new hap.Service.AccessoryInformation()
-      .setCharacteristic(hap.Characteristic.Manufacturer, config.manufacturer)
-      .setCharacteristic(hap.Characteristic.Model, config.model)
+      .setCharacteristic(hap.Characteristic.Manufacturer, this.manufacturer)
+      .setCharacteristic(hap.Characteristic.Model, this.model)
+      .setCharacteristic(hap.Characteristic.SerialNumber, this.serial)
 
     this.log("WeConnect finished initializing!")
   }

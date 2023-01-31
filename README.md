@@ -52,5 +52,6 @@ It is advised to split the accessory into separate tiles (standard HomeKit funct
 ### Additional options
 | Key | Description | Default |
 | --- | --- | --- |
-| `model` | Appears under the _Model_ field for the accessory | plugin |
+| `model` | Appears under the _Model_ field for the accessory | plugin name |
 | `manufacturer` | Appears under the _Manufacturer_ field for the accessory | author |
+| `serial` | Appears under the _Serialnumber_ field for the accessory | plugin version |
