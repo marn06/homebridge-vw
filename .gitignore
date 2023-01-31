@@ -3,3 +3,4 @@ __pycache__
 weconnectAPI.access
 weconnectAPI.session
 *.log
+dist
