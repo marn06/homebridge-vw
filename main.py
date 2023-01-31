@@ -12,62 +12,71 @@ from NativeAPI import WeConnect, VWError
 
 # Ensure working directory is same as this files location
 if os.path.dirname(sys.argv[0]):
-	os.chdir(os.path.dirname(sys.argv[0]))
+    os.chdir(os.path.dirname(sys.argv[0]))
+
 
 def persistCarStates(carStates: CarStates):
-	with open('carStates.json', 'w', buffering=1) as outfile:
-		outfile.write(json_helpers.to_json(carStates, unpicklable=True))
+    with open('carStates.json', 'w', buffering=1) as outfile:
+        outfile.write(json_helpers.to_json(carStates, unpicklable=True))
+
 
 def getCarStates() -> CarStates:
-	if not os.path.isfile('carStates.json'):
-		f = open('carStates.json', 'x')
-		f.close()
-		return CarStates()
+    if not os.path.isfile('carStates.json'):
+        f = open('carStates.json', 'x')
+        f.close()
+        return CarStates()
 
-	with open('carStates.json', 'r', buffering=1) as outfile:
-		try:
-			return CarStates(json_helpers.from_json(CarStates, outfile.read()))
-		except:
-			return CarStates()
+    with open('carStates.json', 'r', buffering=1) as outfile:
+        try:
+            return CarStates(json_helpers.from_json(CarStates, outfile.read()))
+        except:
+            return CarStates()
+
 
 def getClimatisationStatus(vwc, vin):
-	climaterStatus = vwc.get_climater(vin)['climater']['status']
-	state = climaterStatus['climatisationStatusData']['climatisationState']['content'] == 'heating'
+    climaterStatus = vwc.get_climater(vin)['climater']['status']
+    state = climaterStatus['climatisationStatusData']['climatisationState']['content'] == 'heating'
 
-	logger.info("Climater status: " + json_helpers.to_json(climaterStatus, unpicklable=False))
+    logger.info("Climater status: " +
+                json_helpers.to_json(climaterStatus, unpicklable=False))
 
-	return state 
-	
+    return state
+
+
 def getLockedStatus(vwc, vin):
-	vsr = vwc.get_vsr(vin)
-	pvsr = vwc.parse_vsr(vsr)
-	doors = pvsr.get('doors',[])
-	avdoors = {'left_front':'Left front', 'right_front':'Right front', 'left_rear':'Left rear', 'right_rear':'Right rear', 'trunk':'Trunk'}
-	
-	logger.info("Doors status: " + json_helpers.to_json(doors, unpicklable=False))
+    vsr = vwc.get_vsr(vin)
+    pvsr = vwc.parse_vsr(vsr)
+    doors = pvsr.get('doors', [])
+    avdoors = {'left_front': 'Left front', 'right_front': 'Right front',
+               'left_rear': 'Left rear', 'right_rear': 'Right rear', 'trunk': 'Trunk'}
 
-	for d in avdoors.items():
-		locked = doors.get('lock_'+d[0],'')
-		if (locked != 'locked'):
-			return False
-		
-	return True
+    logger.info("Doors status: " +
+                json_helpers.to_json(doors, unpicklable=False))
+
+    for d in avdoors.items():
+        locked = doors.get('lock_'+d[0], '')
+        if (locked != 'locked'):
+            return False
+
+    return True
+
 
 if len(sys.argv) >= 6:
-	username = sys.argv[1]
-	password = sys.argv[2]
-	spin = sys.argv[3]
-	command = sys.argv[4]
-	value = str(sys.argv[5])
+    username = sys.argv[1]
+    password = sys.argv[2]
+    spin = sys.argv[3]
+    command = sys.argv[4]
+    value = str(sys.argv[5])
 else:
-	exit(1)
+    exit(1)
 
 vin = ''
 
 if len(sys.argv) >= 7:
-	vin = sys.argv[6]
+    vin = sys.argv[6]
 
-logFormatter = logging.Formatter(fmt='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
+logFormatter = logging.Formatter(
+    fmt='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 logging.basicConfig(format=logFormatter.format, datefmt=logFormatter.datefmt)
 
 logger = logging.getLogger('WeConnect')
@@ -80,63 +89,68 @@ logger.addHandler(fileHandler)
 carStates = getCarStates()
 
 try:
-	credentials = Credentials(username, password, spin)
-	vwc = WeConnect(credentials)
-	vwc.login()
+    credentials = Credentials(username, password, spin)
+    vwc = WeConnect(credentials)
+    vwc.login()
 
-	if len(vin) == 0:
-		vin = vwc.get_real_car_data()['realCars'][0]['vehicleIdentificationNumber']
-		carStates[vin] = CarState()
-		logger.info("VIN: " + vin)
-	elif vin not in carStates:
-		carStates[vin] = CarState()
+    if len(vin) == 0:
+        vin = vwc.get_real_car_data(
+        )['realCars'][0]['vehicleIdentificationNumber']
+        carStates[vin] = CarState()
+        logger.info("VIN: " + vin)
+    elif vin not in carStates:
+        carStates[vin] = CarState()
 
-	if command == 'locked':
-		isLocked = getLockedStatus(vwc, vin)
-		if value == '1':
-			if not isLocked:
-				response = vwc.lock(vin, action='lock')
-				logger.info(response)
-		elif value == '0':
-			if isLocked:
-				response = vwc.lock(vin, action='unlock')
-				logger.info(response)
-		elif value == 'status':
-			pass
-		else:
-			print('Command: ' + command + ' unknown value: ' + value)
-			exit(1)
+    if command == 'locked':
+        isLocked = getLockedStatus(vwc, vin)
+        if value == '1':
+            if not isLocked:
+                response = vwc.lock(vin, action='lock')
+                isLocked = True
+                logger.info(response)
+        elif value == '0':
+            if isLocked:
+                response = vwc.lock(vin, action='unlock')
+                isLocked = False
+                logger.info(response)
+        elif value == 'status':
+            pass
+        else:
+            print('Command: ' + command + ' unknown value: ' + value)
+            exit(1)
 
-		carStates[vin].locked = isLocked
-		print(json_helpers.to_json(carStates[vin], unpicklable=False))
-		persistCarStates(carStates)
-	elif command == 'climatisation':
-		climatisationStatus = getClimatisationStatus(vwc, vin)
-	
-		if value == '1':
-			on = vwc.climatisation_v2(vin, action='on', temperature=24.0)
-			logger.info(on)
-			climatisationStatus = True if (on['action']['actionState'] == 'queued' and on['action']['type'] == 'startClimatisation') else False
-		elif value == '0':
-			off = vwc.climatisation(vin, action='off')
-			logger.info(off)
-			climatisationStatus = True if (off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else False
-		elif value == 'status':
-			pass
-		else:
-			print('Command: ' + command + ' unknown value: ' + value)
-			exit(1)
+        carStates[vin].locked = isLocked
+        print(json_helpers.to_json(carStates[vin], unpicklable=False))
+        persistCarStates(carStates)
+    elif command == 'climatisation':
+        climatisationStatus = getClimatisationStatus(vwc, vin)
 
-		carStates[vin].climatisation = climatisationStatus
-		print(json_helpers.to_json(carStates[vin], unpicklable=False))
-		persistCarStates(carStates)
-	else:
-		logger.error('Unknown command')
+        if value == '1':
+            on = vwc.climatisation_v2(vin, action='on', temperature=24.0)
+            logger.info(on)
+            climatisationStatus = True if (
+                on['action']['actionState'] == 'queued' and on['action']['type'] == 'startClimatisation') else False
+        elif value == '0':
+            off = vwc.climatisation(vin, action='off')
+            logger.info(off)
+            climatisationStatus = True if (
+                off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else False
+        elif value == 'status':
+            pass
+        else:
+            print('Command: ' + command + ' unknown value: ' + value)
+            exit(1)
+
+        carStates[vin].climatisation = climatisationStatus
+        print(json_helpers.to_json(carStates[vin], unpicklable=False))
+        persistCarStates(carStates)
+    else:
+        logger.error('Unknown command')
 
 except VWError as e:
-	if 'login.error' in e.message:
-		logger.error('VWError: Failed to login')
-	else:
-		logger.error("VWError: " + e.message)
+    if 'login.error' in e.message:
+        logger.error('VWError: Failed to login')
+    else:
+        logger.error("VWError: " + e.message)
 except Exception as e:
-	logger.error("Fatal Error: " + str(e))
+    logger.error("Fatal Error: " + str(e))

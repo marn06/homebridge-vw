@@ -14,7 +14,7 @@ import timeoutPromise from "./timeoutPromise"
 import { join } from 'path'
 import { spawn } from 'child_process'
 
-const packageJson = require('./package.json')
+const packageJson = require('../package.json')
 
 let hap: HAP
 
@@ -61,7 +61,7 @@ class WeConnect implements AccessoryPlugin {
 
     this.manufacturer = config['manufacturer'] || packageJson['author']
     this.model = config['model'] || packageJson['name']
-    this.serial = config['serial'] || packageJson['verson']
+    this.serial = config['serial'] || packageJson['version']
 
     this.climatisationService = new hap.Service.Fan(this.name)
     this.climatisationService.getCharacteristic(hap.Characteristic.ConfiguredName)
@@ -83,7 +83,7 @@ class WeConnect implements AccessoryPlugin {
           var duration = (now.valueOf() - this.lastLockedRequest.valueOf()) / 10000
 
           if (duration < 30) {
-            this.log("Multiple requests within 30 seconds")
+            this.log("Multiple requests within 30 seconds, ignored")
             const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
             this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState)
             return lockState
@@ -96,11 +96,11 @@ class WeConnect implements AccessoryPlugin {
           await this.getCurrentState('locked').then((isLocked) => {
             this.locked = isLocked
           }, (error) => {
-            this.log.error("Get Error: " + error)
+            this.log.error("Get locked state Error: " + error)
           })
         }
         catch (error) {
-          this.log.error("Try Get Error: " + error)
+          this.log.error("Try get locked state Error: " + error)
         }
         const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
         this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState)
@@ -116,11 +116,11 @@ class WeConnect implements AccessoryPlugin {
             this.locked = (value == hap.Characteristic.LockTargetState.SECURED)
             success = true
           }, (error) => {
-            this.log.error("Set Error: " + error.message)
+            this.log.error("Set locked state Error: " + error.message)
           })
         }
         catch (error) {
-          this.log.error("Try Set Error: " + error)
+          this.log.error("Try set locked state Error: " + error)
         }
         if (!success) {
           this.log("Revert to: " + (this.locked ? "SECURED" : "UNSECURED"))
@@ -154,11 +154,11 @@ class WeConnect implements AccessoryPlugin {
             this.climatisationOn = on
             return this.climatisationOn
           }, (error) => {
-            this.log.error("Get Error: " + error)
+            this.log.error("Get climatisation state Error: " + error)
           })
         }
         catch (error) {
-          this.log.error("Try Get Error: " + error)
+          this.log.error("Try get climatisation state Error: " + error)
         }
         return false
       })
@@ -172,14 +172,14 @@ class WeConnect implements AccessoryPlugin {
             this.climatisationOn = (value == "1")
             log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"))
           }, (error) => {
-            this.log.error("Set Error: " + error.message)
+            this.log.error("Set climatisation state Error: " + error.message)
             setTimeout(() => {
               this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(false)
             }, 1000); // Go back to turned off if error
           })
         }
         catch (error) {
-          this.log.error("Try Set Error: " + error)
+          this.log.error("Try set climatisation state Error: " + error)
         }
       })
 
