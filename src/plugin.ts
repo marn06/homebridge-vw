@@ -142,8 +142,8 @@ class WeConnect implements AccessoryPlugin {
           var duration = (now.valueOf() - this.lastClimatisationRequest.valueOf()) / 10000
 
           if (duration < 30) {
-            this.log("Multiple requests within 30 seconds")
-            return this.climatisationOn ? hap.Characteristic.CurrentFanState.BLOWING_AIR : hap.Characteristic.CurrentFanState.INACTIVE
+            this.log("Multiple requests within 30 seconds, ignored")
+            return this.climatisationOn
           }
         }
 
@@ -214,7 +214,7 @@ class WeConnect implements AccessoryPlugin {
     python.stdout.on('data', (data) => {
       let parsed = JSON.parse(data)
       if (command == 'climatisation') {
-        currentState = parsed.cabinHeating
+        currentState = parsed.climatisation
       }
       else if (command == 'locked') {
         currentState = parsed.locked
@@ -280,7 +280,7 @@ class WeConnect implements AccessoryPlugin {
     python.stdout.on('data', (data) => {
       let parsed = JSON.parse(data)
       if (command == 'climatisation') {
-        currentState = parsed.cabinHeating
+        currentState = parsed.climatisation
       }
       else if (command == 'locked') {
         currentState = parsed.locked

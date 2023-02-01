@@ -12,7 +12,7 @@
 
 ## Description
 
-This [homebridge](https://github.com/homebridge/homebridge) plugin exposes a Fan (climatisation) and a Lock (lock/unlock car) to Apple's [HomeKit](http://www.apple.com/ios/home/).
+This [homebridge](https://github.com/homebridge/homebridge) plugin exposes a Fan (climatisation on/off) and a Lock (lock/unlock car) to Apple's [HomeKit](http://www.apple.com/ios/home/).
 It is advised to split the accessory into separate tiles (standard HomeKit functionality) and use a room with the name of the car for the two split accessories.
 
 ## Installation
