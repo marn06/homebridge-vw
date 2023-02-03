@@ -14,6 +14,7 @@
 
 This [homebridge](https://github.com/homebridge/homebridge) plugin exposes a Fan (climatisation on/off) and a Lock (lock/unlock car) to Apple's [HomeKit](http://www.apple.com/ios/home/).
 It is advised to split the accessory into separate tiles (standard HomeKit functionality) and use a room with the name of the car for the two split accessories.
+Thanks to Trocotronic (https://github.com/trocotronic) for the WeConnect Python API.
 
 ## Installation
 
@@ -47,8 +48,9 @@ It is advised to split the accessory into separate tiles (standard HomeKit funct
 | `password` | Is the password assigned to your WeConnect account | N/A |
 | `spin` | Spin is the 4 digit code assigned to your WeConnect account | N/A |
 | `vin` | VIN of the car, if empty VIN of first car will be used | N/A |
+| `temperature` | Target temperature of climatisation | `24.0` |
 | `pollInterval` | Time (in seconds) before next poll can occur per Service | `30` |
-
+ 
 ### Additional options
 | Key | Description | Default |
 | --- | --- | --- |

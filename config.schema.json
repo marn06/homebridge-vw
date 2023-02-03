@@ -53,6 +53,14 @@
                 "type": "number",
                 "default": 300,
                 "description": "How often to request for changes in seconds"
+            },
+            "temperature": {
+                "title": "Temperature",
+                "type": "number",
+                "minimum": 16.0,
+                "maximum": 29.5,
+                "default": 24.0,
+                "description": "Desired temperature of climatisation"
             }
         }
     }

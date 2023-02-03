@@ -71,9 +71,13 @@ else:
     exit(1)
 
 vin = ''
+temperature = 24.0
 
-if len(sys.argv) >= 7:
+if len(sys.argv) >= 7: 
     vin = sys.argv[6]
+
+if len(sys.argv) >= 8:
+    temperature = float(sys.argv[7])
 
 logFormatter = logging.Formatter(
     fmt='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
@@ -127,15 +131,21 @@ try:
         climatisationStatus = getClimatisationStatus(vwc, vin)
 
         if value == '1':
-            on = vwc.climatisation_v2(vin, action='on', temperature=24.0)
-            logger.info(on)
-            climatisationStatus = True if (
-                on['action']['actionState'] == 'queued' and on['action']['type'] == 'startClimatisation') else False
+            climatisationOn = vwc.climatisation_v2(vin, action='on', temperature=24.0)
+            windowHeatingOn = vwc.window_melt(vin, action='on')
+            logger.info(climatisationOn)
+            logger.info(windowHeatingOn)
+            t1 = climatisationOn['action']['actionState'] == 'queued' and climatisationOn['action']['type'] == 'startClimatisation'
+            t2 = windowHeatingOn['action']['actionState'] == 'queued' and windowHeatingOn['action']['type'] == 'startWindowHeating'
+            climatisationStatus = True if (t1 and t2) else False # Return State of Heating
         elif value == '0':
-            off = vwc.climatisation(vin, action='off')
-            logger.info(off)
-            climatisationStatus = False if (
-                off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else True
+            climatisationOff = vwc.climatisation(vin, action='off')
+            windowHeatingOff = vwc.window_melt(vin, action='off')
+            logger.info(climatisationOff)
+            logger.info(windowHeatingOff)
+            t1 = climatisationOff['action']['actionState'] == 'queued' and climatisationOff['action']['type'] == 'stopClimatisation'
+            t2 = windowHeatingOff['action']['actionState'] == 'queued' and windowHeatingOff['action']['type'] == 'stopWindowHeating'
+            climatisationStatus = False if (t1 and t2) else True # Return State of Heating
         elif value == 'status':
             pass
         else:

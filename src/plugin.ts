@@ -27,17 +27,18 @@ export = (api: API) => {
 class WeConnect implements AccessoryPlugin {
   private readonly log: Logging
   private readonly config: AccessoryConfig
-  private readonly name: string = "WeConnect"
-  private readonly climaterName: string = "Climatisation"
-  private readonly lockName: string = "Doors"
-  private readonly username: string = ""
-  private readonly password: string = ""
-  private readonly spin: string = ""
-  private readonly vin: string = ""
+  private readonly name: string
+  private readonly climaterName: string
+  private readonly lockName: string
+  private readonly username: string
+  private readonly password: string
+  private readonly spin: string
+  private readonly vin: string
+  private readonly temperature?: number
 
-  private readonly manufacturer: string = ""
-  private readonly model: string = ""
-  private readonly serial: string = ""
+  private readonly manufacturer: string
+  private readonly model: string
+  private readonly serial: string
 
   private lastClimatisationRequest: Date | undefined = undefined
   private lastLockedRequest: Date | undefined = undefined
@@ -59,6 +60,7 @@ class WeConnect implements AccessoryPlugin {
     this.password = config['password']
     this.spin = config['spin']
     this.vin = config['vin']
+    this.temperature = config['temperature'] || 24.0
 
     this.manufacturer = config['manufacturer'] || packageJson['author']
     this.model = config['model'] || packageJson['name']
@@ -201,7 +203,8 @@ class WeConnect implements AccessoryPlugin {
   }
 
   async setCurrentState(command: string, value: string): Promise<void> {
-    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, value, this.vin])
+    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'),
+    this.username, this.password, this.spin, command, value, this.vin, this.temperature!.toString()])
 
     let success = false
     let error: string | undefined = undefined
@@ -258,14 +261,19 @@ class WeConnect implements AccessoryPlugin {
                   }
                   const state = await this.getCurrentState(command)
                   console.log(`State after ${(timeout / 1000) * tries} seconds: ` + state)
+                  const success = (state && value == '1') || (!state && value == '0')
                   if (command == 'locked') {
-                    const newValue = state ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
-                    this.lockService.getCharacteristic(hap.Characteristic.LockCurrentState).updateValue(newValue)
-                    resolve((state && value == '1') || (!state && value == '0'))
+                    if (success) {
+                      const newValue = state ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
+                      this.lockService.getCharacteristic(hap.Characteristic.LockCurrentState).updateValue(newValue)
+                    }
+                    resolve(success)
                   }
                   else {
-                    this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
-                    resolve((state && value == '1') || (!state && value == '0'))
+                    if (success) {
+                      this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
+                      resolve(success)
+                    }
                   }
                 }
                 catch {
