@@ -103,6 +103,7 @@ try:
 
     if command == 'locked':
         isLocked = getLockedStatus(vwc, vin)
+        
         if value == '1':
             if not isLocked:
                 response = vwc.lock(vin, action='lock')
@@ -133,8 +134,8 @@ try:
         elif value == '0':
             off = vwc.climatisation(vin, action='off')
             logger.info(off)
-            climatisationStatus = True if (
-                off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else False
+            climatisationStatus = False if (
+                off['action']['actionState'] == 'queued' and off['action']['type'] == 'stopClimatisation') else True
         elif value == 'status':
             pass
         else:

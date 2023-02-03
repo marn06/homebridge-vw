@@ -13,6 +13,7 @@ import {
 import timeoutPromise from "./timeoutPromise"
 import { join } from 'path'
 import { spawn } from 'child_process'
+import { time } from "console"
 
 const packageJson = require('../package.json')
 
@@ -226,6 +227,9 @@ class WeConnect implements AccessoryPlugin {
       else if (value == '0' && !currentState) {
         success = true
       }
+      else {
+        this.log(`Python error due to: Current State ${currentState} and Set Value ${value}`)
+      }
     })
 
     return timeoutPromise(new Promise((resolve, reject) => {
@@ -240,29 +244,53 @@ class WeConnect implements AccessoryPlugin {
           }
           resolve()
 
-          setTimeout(async () => {
-            // Force refresh with get status
-            if (command == 'locked') {
-              this.lastLockedRequest = undefined
-            }
-            else {
-              this.lastClimatisationRequest = undefined
-            }
-            const state = await this.getCurrentState(command)
-            console.log("State after 15 seconds: " + state)
-            if (command == 'locked') {
-              this.lockService.getCharacteristic(hap.Characteristic.LockCurrentState).updateValue(state)
-            }
-            else {
-              this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
-            }
-          }, 15000)
+          this.runWithRetry(3, async (tries): Promise<boolean> => {
+            const timeout = 10000
+            return new Promise<boolean>((resolve, reject) => {
+              setTimeout(async (boolean) => {
+                try {
+                  // Force refresh with get status
+                  if (command == 'locked') {
+                    this.lastLockedRequest = undefined
+                  }
+                  else {
+                    this.lastClimatisationRequest = undefined
+                  }
+                  const state = await this.getCurrentState(command)
+                  console.log(`State after ${(timeout / 1000) * tries} seconds: ` + state)
+                  if (command == 'locked') {
+                    const newValue = state ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
+                    this.lockService.getCharacteristic(hap.Characteristic.LockCurrentState).updateValue(newValue)
+                    resolve((state && value == '1') || (!state && value == '0'))
+                  }
+                  else {
+                    this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
+                    resolve((state && value == '1') || (!state && value == '0'))
+                  }
+                }
+                catch {
+                  reject(new Error(`Failed to fetch new ${command} state after SET`))
+                }
+
+              }, timeout)
+            })
+          })
         }
         else {
           reject(new Error(error))
         }
       })
     }), 10000, new Error(`Timed out setting state of ${command} to ${value}`))
+  }
+
+  async runWithRetry(retryCount: number, action: (tries: number) => Promise<boolean>) {
+    let tries = 1
+    while (tries <= retryCount) {
+      if (await action(tries)) {
+        break
+      }
+      tries++
+    }
   }
 
   async getCurrentState(command: string): Promise<boolean> {
