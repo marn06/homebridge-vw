@@ -73,7 +73,7 @@ else:
 vin = ''
 temperature = 24.0
 
-if len(sys.argv) >= 7: 
+if len(sys.argv) >= 7:
     vin = sys.argv[6]
 
 if len(sys.argv) >= 8:
@@ -107,7 +107,7 @@ try:
 
     if command == 'locked':
         isLocked = getLockedStatus(vwc, vin)
-        
+
         if value == '1':
             if not isLocked:
                 response = vwc.lock(vin, action='lock')
@@ -131,13 +131,15 @@ try:
         climatisationStatus = getClimatisationStatus(vwc, vin)
 
         if value == '1':
-            climatisationOn = vwc.climatisation_v2(vin, action='on', temperature=24.0)
+            climatisationOn = vwc.climatisation_v2(
+                vin, action='on', temperature=24.0)
             windowHeatingOn = vwc.window_melt(vin, action='on')
             logger.info(climatisationOn)
             logger.info(windowHeatingOn)
             t1 = climatisationOn['action']['actionState'] == 'queued' and climatisationOn['action']['type'] == 'startClimatisation'
             t2 = windowHeatingOn['action']['actionState'] == 'queued' and windowHeatingOn['action']['type'] == 'startWindowHeating'
-            climatisationStatus = True if (t1 and t2) else False # Return State of Heating
+            climatisationStatus = True if (
+                t1 and t2) else False  # Return State of Heating
         elif value == '0':
             climatisationOff = vwc.climatisation(vin, action='off')
             windowHeatingOff = vwc.window_melt(vin, action='off')
@@ -145,7 +147,8 @@ try:
             logger.info(windowHeatingOff)
             t1 = climatisationOff['action']['actionState'] == 'queued' and climatisationOff['action']['type'] == 'stopClimatisation'
             t2 = windowHeatingOff['action']['actionState'] == 'queued' and windowHeatingOff['action']['type'] == 'stopWindowHeating'
-            climatisationStatus = False if (t1 and t2) else True # Return State of Heating
+            climatisationStatus = False if (
+                t1 and t2) else True  # Return State of Heating
         elif value == 'status':
             pass
         else:

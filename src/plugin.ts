@@ -272,8 +272,8 @@ class WeConnect implements AccessoryPlugin {
                   else {
                     if (success) {
                       this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
-                      resolve(success)
                     }
+                    resolve(success)
                   }
                 }
                 catch {
