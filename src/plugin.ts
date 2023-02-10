@@ -59,7 +59,7 @@ class WeConnect implements AccessoryPlugin {
     this.username = config['username']
     this.password = config['password']
     this.spin = config['spin']
-    this.vin = config['vin']
+    this.vin = config['vin'] || ''
     this.temperature = config['temperature'] || 24.0
 
     this.manufacturer = config['manufacturer'] || packageJson['author']
