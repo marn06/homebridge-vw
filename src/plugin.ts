@@ -203,7 +203,7 @@ class WeConnect implements AccessoryPlugin {
   }
 
   async setCurrentState(command: string, value: string): Promise<void> {
-    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'),
+    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, 'main.py'),
     this.username, this.password, this.spin, command, value, this.vin, this.temperature!.toString()])
 
     let success = false
@@ -313,7 +313,7 @@ class WeConnect implements AccessoryPlugin {
   }
 
   async getCurrentState(command: string): Promise<boolean> {
-    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, '../main.py'), this.username, this.password, this.spin, command, 'status', this.vin])
+    let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, 'main.py'), this.username, this.password, this.spin, command, 'status', this.vin])
 
     let success = false
     let error: string | undefined = undefined
