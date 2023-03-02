@@ -83,10 +83,10 @@ class WeConnect implements AccessoryPlugin {
 
         if (this.lastLockedRequest != undefined) {
           var now = new Date()
-          var duration = (now.valueOf() - this.lastLockedRequest.valueOf()) / 10000
+          var duration = (now.valueOf() - this.lastLockedRequest.valueOf()) / 1000
 
-          if (duration < 30) {
-            this.log("Multiple requests within 30 seconds, ignored")
+          if (duration < 60) {
+            this.log("Multiple requests within 60 seconds, ignored")
             const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
             this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState)
             return lockState
