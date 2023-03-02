@@ -99,14 +99,30 @@ try:
     vwc.login()
 
     if len(vin) == 0:
-        vin = vwc.get_real_car_data(
-        )['realCars'][0]['vehicleIdentificationNumber']
-        carStates[vin] = CarState()
+        vin = vwc.get_real_car_data()['realCars'][0]['vehicleIdentificationNumber']
+
+        if vin not in carStates:
+            carStates[vin] = CarState()
+ 
         logger.info("VIN: " + vin)
     elif vin not in carStates:
         carStates[vin] = CarState()
+ 
+    if command == 'battery':
+        if value == 'status':
+            charger = vwc.get_charger(vin)
+            charging = charger['charger']['status']['chargingStatusData']['chargingState']['content'] != 'off'
+            batteryLevel = charger['charger']['status']['batteryStatusData']['stateOfCharge']['content']
 
-    if command == 'locked':
+            carStates[vin].charging = charging
+            carStates[vin].batteryLevel = batteryLevel
+        else: 
+            print('Command: ' + command + ' unknown value: ' + value)
+            exit(1)
+   
+        print(json_helpers.to_json(carStates[vin], unpicklable=False))
+        persistCarStates(carStates)
+    elif command == 'locked':
         isLocked = getLockedStatus(vwc, vin)
 
         if value == '1':

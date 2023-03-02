@@ -29,6 +29,7 @@ class WeConnect implements AccessoryPlugin {
   private readonly name: string
   private readonly climaterName: string
   private readonly lockName: string
+  private readonly batteryName: string
   private readonly username: string
   private readonly password: string
   private readonly spin: string
@@ -41,11 +42,15 @@ class WeConnect implements AccessoryPlugin {
 
   private lastClimatisationRequest: Date | undefined = undefined
   private lastLockedRequest: Date | undefined = undefined
+  private lastBatteryRequest: Date | undefined = undefined
   private climatisationOn = false
   private locked = false
+  private charging = false
+  private batteryLevel = 0
 
   private readonly climatisationService: Service
   private readonly lockService: Service
+  private readonly batteryService: Service
   private readonly informationService: Service
   constructor(log: Logging, config: AccessoryConfig, api: API) {
 
@@ -55,6 +60,7 @@ class WeConnect implements AccessoryPlugin {
     this.name = config.name
     this.climaterName = config['climaterName'] || "Climatisation"
     this.lockName = config['lockName'] || "Doors"
+    this.batteryName = config['batteryName'] || "Battery"
     this.username = config['username']
     this.password = config['password']
     this.spin = config['spin']
@@ -77,34 +83,79 @@ class WeConnect implements AccessoryPlugin {
         return callback(null, this.lockName)
       })
 
+    this.batteryService = new hap.Service.Battery(this.name)
+    this.batteryService.getCharacteristic(hap.Characteristic.ConfiguredName)
+      .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
+        return callback(null, this.batteryName)
+      })
+
+    this.batteryService.getCharacteristic(hap.Characteristic.StatusLowBattery)
+      .onGet(async () => {
+        if (this.batteryLevel < 10) {
+          return hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
+        }
+        return hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
+      })
+
+    this.batteryService.getCharacteristic(hap.Characteristic.BatteryLevel)
+      .onGet(async () => {
+        this.log("Get battery state")
+
+        if (this.lastBatteryRequest != undefined) {
+          var now = new Date()
+          var duration = (now.valueOf() - this.lastBatteryRequest.valueOf()) / 1000
+
+          if (duration < 60) {
+            this.log("Multiple requests within 60 seconds, ignored")
+            return this.batteryLevel
+          }
+        }
+
+        this.lastBatteryRequest = new Date()
+
+        try {
+          await this.getCurrentState('battery').catch((error) => {
+            this.log.error("Get battery state Error: " + error)
+          })
+        }
+        catch (error) {
+          this.log.error("Try get battery state Error: " + error)
+        }
+
+        const chargingState = this.charging ? hap.Characteristic.ChargingState.CHARGING : hap.Characteristic.ChargingState.NOT_CHARGING
+        this.batteryService.getCharacteristic(hap.Characteristic.ChargingState).updateValue(chargingState)
+
+        return this.batteryLevel
+      })
+
     this.lockService.getCharacteristic(hap.Characteristic.LockCurrentState)
       .onGet(async () => {
         this.log("Get locked state")
 
+        let fetchState = true
         if (this.lastLockedRequest != undefined) {
           var now = new Date()
           var duration = (now.valueOf() - this.lastLockedRequest.valueOf()) / 1000
 
           if (duration < 60) {
             this.log("Multiple requests within 60 seconds, ignored")
-            const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
-            this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState)
-            return lockState
+            fetchState = false
           }
         }
 
-        this.lastLockedRequest = new Date()
+        if (fetchState) {
+          this.lastLockedRequest = new Date()
 
-        try {
-          await this.getCurrentState('locked').then((isLocked) => {
-            this.locked = isLocked
-          }, (error) => {
-            this.log.error("Get locked state Error: " + error)
-          })
+          try {
+            await this.getCurrentState('locked').catch((error) => {
+              this.log.error("Get locked state Error: " + error)
+            })
+          }
+          catch (error) {
+            this.log.error("Try get locked state Error: " + error)
+          }
         }
-        catch (error) {
-          this.log.error("Try get locked state Error: " + error)
-        }
+
         const lockState = this.locked ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
         this.lockService.getCharacteristic(hap.Characteristic.LockTargetState).updateValue(lockState)
         return lockState
@@ -153,17 +204,14 @@ class WeConnect implements AccessoryPlugin {
         this.lastClimatisationRequest = new Date()
 
         try {
-          await this.getCurrentState('climatisation').then((on) => {
-            this.climatisationOn = on
-            return this.climatisationOn
-          }, (error) => {
+          await this.getCurrentState('climatisation').catch((error) => {
             this.log.error("Get climatisation state Error: " + error)
           })
         }
         catch (error) {
           this.log.error("Try get climatisation state Error: " + error)
         }
-        return false
+        return this.climatisationOn
       })
 
     this.climatisationService.getCharacteristic(hap.Characteristic.On)
@@ -269,7 +317,19 @@ class WeConnect implements AccessoryPlugin {
             else {
               this.lastClimatisationRequest = undefined
             }
-            const state = await this.getCurrentState(command)
+
+            await this.getCurrentState(command).catch((error) => {
+              reject(error)
+            })
+
+            let state: any = undefined
+            if (command == 'locked') {
+              state = this.locked
+            }
+            else if (command == 'climatisation') {
+              state = this.climatisationOn
+            }
+
             console.log(`State after ${(timeout / 1000) * tryNumber} seconds: ` + state)
             const success = (state && value == '1') || (!state && value == '0')
             if (command == 'locked') {
@@ -312,7 +372,7 @@ class WeConnect implements AccessoryPlugin {
     }
   }
 
-  async getCurrentState(command: string): Promise<boolean> {
+  async getCurrentState(command: string): Promise<void> {
     let python = spawn(join(__dirname, '/venv/bin/python3'), [join(__dirname, 'main.py'), this.username, this.password, this.spin, command, 'status', this.vin])
 
     let success = false
@@ -327,10 +387,14 @@ class WeConnect implements AccessoryPlugin {
     python.stdout.on('data', (data) => {
       let parsed = JSON.parse(data)
       if (command == 'climatisation') {
-        currentState = parsed.climatisation
+        this.climatisationOn = parsed.climatisation
       }
       else if (command == 'locked') {
-        currentState = parsed.locked
+        this.locked = parsed.locked
+      }
+      else if (command == 'battery') {
+        this.charging = parsed.charging
+        this.batteryLevel = parsed.batteryLevel
       }
       success = true
     })
@@ -338,7 +402,7 @@ class WeConnect implements AccessoryPlugin {
     return timeoutPromise(new Promise((resolve, reject) => {
       python.on('close', (code) => {
         if (success) {
-          resolve(currentState)
+          resolve()
         }
         else {
           reject(new Error(error))
@@ -355,7 +419,8 @@ class WeConnect implements AccessoryPlugin {
     return [
       this.informationService,
       this.lockService,
-      this.climatisationService
+      this.climatisationService,
+      this.batteryService
     ]
   }
 }

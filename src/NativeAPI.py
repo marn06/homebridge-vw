@@ -384,6 +384,8 @@ class WeConnect():
                             upr.scheme+'://'+upr.netloc+form_url, post=post)
                         logger.info(
                             'Successfully accepted updated terms and conditions')
+                    else:
+                        logger.critical('Failed to accept new terms and conditions, try manually at: ' +  idk['templateModel']['loginUrl'])
                     break
                 elif (metakit['content'] == 'loginAuthenticate'):
                     logger.warn('Meta identitykit is loginAuthenticate')
@@ -483,9 +485,6 @@ class WeConnect():
     def set_logging_level(self, level):
         logger.setLevel(level)
 
-    def version(self):
-        return _version.__version__
-
     def get_personal_data(self):
         r = self.__command(
             '/personalData', dashboard=self.__identities['profile_url'])
@@ -543,7 +542,7 @@ class WeConnect():
         return r
 
     def get_trip_data(self, vin, type='longTerm'):
-        # type: 'longTerm', 'cyclic', 'shortTerm'
+        ## type: 'longTerm', 'cyclic', 'shortTerm'
         r = self.__command('/bs/tripstatistics/v1/{brand}/{country}/vehicles/'+vin+'/tripdata/'+type+'?type=list',
                            dashboard=self.__get_fal_url(vin), scope=self.__oauth['sc2:fal'], accept=self.__accept_mbb)
         return r
