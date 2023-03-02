@@ -12,6 +12,7 @@ class VSR:
     __vsr_fields = [
         ('0x0101010001', '0x0101010001', 'status', 'utc_time'),
         ('0x0101010002', '0x0101010002', 'status', 'distance_covered'),
+        ('0x0202FFFFFF', '0x020203A227', 'milCarSent', 'mil_distance_covered'),
         ('0x0203FFFFFF', '0x0203010001', 'intervals', 'distance_to_oil_change'),
         ('0x0203FFFFFF', '0x0203010002', 'intervals', 'time_to_oil_change'),
         ('0x0203FFFFFF', '0x0203010003', 'intervals', 'distance_to_inspection'),

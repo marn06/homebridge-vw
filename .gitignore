@@ -4,3 +4,4 @@ weconnectAPI.access
 weconnectAPI.session
 *.log
 dist
+carStates.json
