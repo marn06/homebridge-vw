@@ -3,6 +3,7 @@ import sys
 import os
 import logging
 import json_helpers
+import time
 
 from car_state import CarState
 from car_states import CarStates
@@ -128,29 +129,35 @@ try:
         print(json_helpers.to_json(carStates[vin], unpicklable=False))
         persistCarStates(carStates)
     elif command == 'climatisation':
-        climatisationStatus = getClimatisationStatus(vwc, vin)
-
         if value == '1':
-            climatisationOn = vwc.climatisation_v2(
-                vin, action='on', temperature=24.0)
+            climatisationOn = vwc.climatisation_v2(vin, action='on', temperature=temperature)
+            time.sleep(1)
             windowHeatingOn = vwc.window_melt(vin, action='on')
+            time.sleep(1) 
+
             logger.info(climatisationOn)
             logger.info(windowHeatingOn)
+
             t1 = climatisationOn['action']['actionState'] == 'queued' and climatisationOn['action']['type'] == 'startClimatisation'
             t2 = windowHeatingOn['action']['actionState'] == 'queued' and windowHeatingOn['action']['type'] == 'startWindowHeating'
+
             climatisationStatus = True if (
                 t1 and t2) else False  # Return State of Heating
         elif value == '0':
             climatisationOff = vwc.climatisation(vin, action='off')
+            time.sleep(1)
             windowHeatingOff = vwc.window_melt(vin, action='off')
+            time.sleep(1)
+
             logger.info(climatisationOff)
             logger.info(windowHeatingOff)
+
             t1 = climatisationOff['action']['actionState'] == 'queued' and climatisationOff['action']['type'] == 'stopClimatisation'
             t2 = windowHeatingOff['action']['actionState'] == 'queued' and windowHeatingOff['action']['type'] == 'stopWindowHeating'
             climatisationStatus = False if (
                 t1 and t2) else True  # Return State of Heating
         elif value == 'status':
-            pass
+            climatisationStatus = getClimatisationStatus(vwc, vin)
         else:
             print('Command: ' + command + ' unknown value: ' + value)
             exit(1)

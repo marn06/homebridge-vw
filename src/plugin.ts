@@ -13,7 +13,6 @@ import {
 import timeoutPromise from "./timeoutPromise"
 import { join } from 'path'
 import { spawn } from 'child_process'
-import { time } from "console"
 
 const packageJson = require('../package.json')
 
@@ -71,6 +70,7 @@ class WeConnect implements AccessoryPlugin {
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
         return callback(null, this.climaterName)
       })
+
     this.lockService = new hap.Service.LockMechanism(this.name)
     this.lockService.getCharacteristic(hap.Characteristic.ConfiguredName)
       .on(CharacteristicEventTypes.GET, (callback: CharacteristicGetCallback) => {
@@ -247,7 +247,19 @@ class WeConnect implements AccessoryPlugin {
           }
           resolve()
 
-          this.runWithRetry(3, async (tries): Promise<boolean> => {
+          const maxTries = 4 // Runs 1 less than maxTries
+          this.runWithRetry(maxTries, async (tryNumber): Promise<boolean> => {
+            if (tryNumber == maxTries) {
+              if (command == 'locked') {
+                this.lockService.getCharacteristic(hap.Characteristic.On).updateValue(null)
+              }
+              else {
+                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(null)
+              }
+              console.log(`Failed setting state of ${command} to ${value} after ${maxTries - 1} tries`);
+              return false
+            }
+
             const timeout = 10000
             return new Promise<boolean>((resolve, reject) => {
               setTimeout(async (boolean) => {
@@ -260,7 +272,7 @@ class WeConnect implements AccessoryPlugin {
                     this.lastClimatisationRequest = undefined
                   }
                   const state = await this.getCurrentState(command)
-                  console.log(`State after ${(timeout / 1000) * tries} seconds: ` + state)
+                  console.log(`State after ${(timeout / 1000) * tryNumber} seconds: ` + state)
                   const success = (state && value == '1') || (!state && value == '0')
                   if (command == 'locked') {
                     if (success) {
@@ -279,7 +291,6 @@ class WeConnect implements AccessoryPlugin {
                 catch {
                   reject(new Error(`Failed to fetch new ${command} state after SET`))
                 }
-
               }, timeout)
             })
           })
