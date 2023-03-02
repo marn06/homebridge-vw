@@ -247,59 +247,69 @@ class WeConnect implements AccessoryPlugin {
           }
           resolve()
 
-          const maxTries = 4 // Runs 1 less than maxTries
-          this.runWithRetry(maxTries, async (tryNumber): Promise<boolean> => {
-            if (tryNumber == maxTries) {
-              if (command == 'locked') {
-                this.lockService.getCharacteristic(hap.Characteristic.On).updateValue(null)
-              }
-              else {
-                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(null)
-              }
-              console.log(`Failed setting state of ${command} to ${value} after ${maxTries - 1} tries`);
-              return false
-            }
-
-            const timeout = 10000
-            return new Promise<boolean>((resolve, reject) => {
-              setTimeout(async (boolean) => {
-                try {
-                  // Force refresh with get status
-                  if (command == 'locked') {
-                    this.lastLockedRequest = undefined
-                  }
-                  else {
-                    this.lastClimatisationRequest = undefined
-                  }
-                  const state = await this.getCurrentState(command)
-                  console.log(`State after ${(timeout / 1000) * tryNumber} seconds: ` + state)
-                  const success = (state && value == '1') || (!state && value == '0')
-                  if (command == 'locked') {
-                    if (success) {
-                      const newValue = state ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
-                      this.lockService.getCharacteristic(hap.Characteristic.LockCurrentState).updateValue(newValue)
-                    }
-                    resolve(success)
-                  }
-                  else {
-                    if (success) {
-                      this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
-                    }
-                    resolve(success)
-                  }
-                }
-                catch {
-                  reject(new Error(`Failed to fetch new ${command} state after SET`))
-                }
-              }, timeout)
-            })
-          })
+          // Polls the car every 10 seconds to see if the queued action was succesfully handled.
+          this.validateSetAction(command, value, 10000)
         }
         else {
           reject(new Error(error))
         }
       })
     }), 10000, new Error(`Timed out setting state of ${command} to ${value}`))
+  }
+
+  async validateSetAction(command: string, value: string, timeout: number) {
+    const maxTries = 3
+    this.runWithRetry(maxTries, async (tryNumber): Promise<boolean> => {
+      if (tryNumber == maxTries) {
+        if (command == 'locked') {
+          this.lockService.getCharacteristic(hap.Characteristic.On).updateValue(null)
+        }
+        else {
+          this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(null)
+        }
+        console.log(`Failed setting state of ${command} to ${value} after ${maxTries - 1} tries`);
+        return false
+      }
+
+      return new Promise<boolean>((resolve, reject) => {
+        setTimeout(async (boolean) => {
+          try {
+            // Force refresh with get status
+            if (command == 'locked') {
+              this.lastLockedRequest = undefined
+            }
+            else {
+              this.lastClimatisationRequest = undefined
+            }
+            const state = await this.getCurrentState(command)
+            console.log(`State after ${(timeout / 1000) * tryNumber} seconds: ` + state)
+            const success = (state && value == '1') || (!state && value == '0')
+            if (command == 'locked') {
+              const lockState = state ? hap.Characteristic.LockCurrentState.SECURED : hap.Characteristic.LockCurrentState.UNSECURED
+              if (success) {
+                this.lockService.getCharacteristic(hap.Characteristic.LockCurrentState).updateValue(lockState)
+              }
+              else if (tryNumber == maxTries) { // If failed after max tries revert to actual state
+                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(lockState);
+              }
+              resolve(success)
+            }
+            else {
+              if (success) {
+                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
+              }
+              else if (tryNumber == maxTries) { // If failed after max tries revert to actual state
+                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state);
+              }
+              resolve(success)
+            }
+          }
+          catch {
+            reject(new Error(`Failed to fetch new ${command} state after SET`))
+          }
+        }, timeout)
+      })
+    })
   }
 
   async runWithRetry(retryCount: number, action: (tries: number) => Promise<boolean>) {

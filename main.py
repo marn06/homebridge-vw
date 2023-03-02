@@ -133,7 +133,7 @@ try:
             climatisationOn = vwc.climatisation_v2(vin, action='on', temperature=temperature)
             time.sleep(1)
             windowHeatingOn = vwc.window_melt(vin, action='on')
-            time.sleep(1) 
+            time.sleep(1)
 
             logger.info(climatisationOn)
             logger.info(windowHeatingOn)
