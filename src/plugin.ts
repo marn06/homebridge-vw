@@ -248,7 +248,7 @@ class WeConnect implements AccessoryPlugin {
           resolve()
 
           // Polls the car every 10 seconds to see if the queued action was succesfully handled.
-          this.validateSetAction(command, value, 10000)
+          this.validateSetAction(command, value, 10000, 3)
         }
         else {
           reject(new Error(error))
@@ -257,20 +257,8 @@ class WeConnect implements AccessoryPlugin {
     }), 10000, new Error(`Timed out setting state of ${command} to ${value}`))
   }
 
-  async validateSetAction(command: string, value: string, timeout: number) {
-    const maxTries = 3
+  async validateSetAction(command: string, value: string, timeout: number, maxTries: number) {
     this.runWithRetry(maxTries, async (tryNumber): Promise<boolean> => {
-      if (tryNumber == maxTries) {
-        if (command == 'locked') {
-          this.lockService.getCharacteristic(hap.Characteristic.On).updateValue(null)
-        }
-        else {
-          this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(null)
-        }
-        console.log(`Failed setting state of ${command} to ${value} after ${maxTries - 1} tries`);
-        return false
-      }
-
       return new Promise<boolean>((resolve, reject) => {
         setTimeout(async (boolean) => {
           try {
@@ -290,7 +278,8 @@ class WeConnect implements AccessoryPlugin {
                 this.lockService.getCharacteristic(hap.Characteristic.LockCurrentState).updateValue(lockState)
               }
               else if (tryNumber == maxTries) { // If failed after max tries revert to actual state
-                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(lockState);
+                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(lockState)
+                console.log(`Failed setting state of ${command} to ${value} after ${maxTries} tries`)
               }
               resolve(success)
             }
@@ -299,7 +288,8 @@ class WeConnect implements AccessoryPlugin {
                 this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
               }
               else if (tryNumber == maxTries) { // If failed after max tries revert to actual state
-                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state);
+                this.climatisationService.getCharacteristic(hap.Characteristic.On).updateValue(state)
+                console.log(`Failed setting state of ${command} to ${value} after ${maxTries} tries`)
               }
               resolve(success)
             }
