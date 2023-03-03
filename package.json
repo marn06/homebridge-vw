@@ -1,7 +1,7 @@
 {
   "name": "homebridge-vw",
   "displayName": "Homebridge VW",
-  "version": "0.0.95-alpha",
+  "version": "0.0.96-alpha",
   "description": "Homebridge plugin for VW We Connect",
   "main": "dist/plugin.js",
   "devDependencies": {
@@ -12,8 +12,8 @@
     "typescript": "^4.9.5"
   },
   "engines": {
-    "homebridge": ">=0.4.50",
-    "node": ">=12.13.0"
+    "homebridge": ">=1.6.0",
+    "node": ">=18.14.2"
   },
   "scripts": {
     "clean": "rimraf ./dist",
