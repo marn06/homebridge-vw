@@ -20,7 +20,7 @@
     "python": "python3 -m venv dist/venv && dist/venv/bin/pip3 install beautifulsoup4 jsonpickle requests xmltodict",
     "build": "rimraf ./dist && tsc && copyfiles -f src/*.py dist",
     "postinstall": "node postinstall.js",
-    "deploy": "npm run build && git add . && git commit . -m release && git push",
+    "deploy": "git add . && git commit . -m release && git push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
