@@ -6,23 +6,23 @@
         "type": "object",
         "properties": {
             "name": {
-                "title": "Name",
+                "title": "Accessory Name",
                 "default": "WeConnect",
                 "type": "string",
                 "required": true
             },
             "climaterName": {
-                "title": "Name",
+                "title": "Climater Name",
                 "default": "Climatisation",
                 "type": "string"
             },
             "lockName": {
-                "title": "Name",
+                "title": "Lock Name",
                 "default": "Doors",
                 "type": "string"
             },
             "chargingSwitchName": {
-                "title": "Name",
+                "title": "Charging Switch Name",
                 "default": "Charging",
                 "type": "string"
             },
