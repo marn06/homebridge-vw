@@ -21,6 +21,11 @@
                 "default": "Doors",
                 "type": "string"
             },
+            "chargingSwitchName": {
+                "title": "Name",
+                "default": "Charging",
+                "type": "string"
+            },
             "username": {
                 "title": "Username",
                 "type": "string",
