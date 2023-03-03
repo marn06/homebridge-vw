@@ -5,6 +5,7 @@
   "description": "Homebridge plugin for VW We Connect",
   "main": "dist/plugin.js",
   "devDependencies": {
+    "@types/node": "^18.14.5",
     "copyfiles": "^2.4.1",
     "homebridge": "^1.0.4",
     "rimraf": "^3.0.2",
@@ -34,8 +35,5 @@
   "bugs": {
     "url": "https://github.com/marn06/homebridge-vw/issues"
   },
-  "homepage": "https://github.com/marn06/homebridge-vw#readme",
-  "dependencies": {
-    "@types/node": "^18.14.5"
-  }
+  "homepage": "https://github.com/marn06/homebridge-vw#readme"
 }
