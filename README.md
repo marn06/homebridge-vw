@@ -44,8 +44,8 @@ Thanks to Trocotronic (https://github.com/trocotronic) for the WeConnect Python 
 | `name` | Name of Accessory to appear in the Home app | WeConnect |
 | `lockName` | Name of Lock service to appear in the Home app | Doors |
 | `climaterName` | Name of Fan service to appear in the Home app | Climatisation |
-| `chargingSwitchName` | Name of Fan service to appear in the Home app | Charging |
-| `username` | Is the username (email) assigned to your WeConnect account | N/A |
+| `chargingSwitchName` | Name of Switch service to appear in the Home app | Charging |
+| `username` | Is the username (email) assigned to your WeConnect account | N/A | 
 | `password` | Is the password assigned to your WeConnect account | N/A |
 | `spin` | Spin is the 4 digit code assigned to your WeConnect account | N/A |
 | `vin` | VIN of the car, if empty VIN of first car will be used | N/A |
