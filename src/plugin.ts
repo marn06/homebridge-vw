@@ -32,7 +32,8 @@ class WeConnect implements AccessoryPlugin {
   private readonly password: string
   private readonly spin: string
   private readonly vin: string
-  private readonly temperature?: number
+  private readonly temperature: number
+  private readonly pollInterval: number
 
   private readonly manufacturer: string
   private readonly model: string
@@ -65,6 +66,7 @@ class WeConnect implements AccessoryPlugin {
     this.spin = config['spin']
     this.vin = config['vin'] || ''
     this.temperature = config['temperature'] || 24.0
+    this.pollInterval = config['pollInterval'] || 60.0
 
     this.manufacturer = config['manufacturer'] || packageJson['author']
     this.model = config['model'] || packageJson['name']
@@ -128,8 +130,8 @@ class WeConnect implements AccessoryPlugin {
           var now = new Date()
           var duration = (now.valueOf() - this.lastBatteryRequest.valueOf()) / 1000
 
-          if (duration < 60) {
-            this.log('Multiple requests within 60 seconds, ignored')
+          if (duration < this.pollInterval) {
+            this.log(`Multiple requests within ${this.pollInterval} seconds, ignored`)
             return this.batteryLevel
           }
         }
@@ -138,11 +140,11 @@ class WeConnect implements AccessoryPlugin {
 
         try {
           await this.getCurrentState('charging').catch((error) => {
-            this.log.error('Get battery state Error: ' + error)
+            this.log.error('Get battery state' + error)
           })
         }
         catch (error) {
-          this.log.error('Try get battery state Error: ' + error)
+          this.log.error('Try get battery state' + error)
         }
 
         const chargingState = this.charging ? hap.Characteristic.ChargingState.CHARGING : hap.Characteristic.ChargingState.NOT_CHARGING
@@ -160,8 +162,8 @@ class WeConnect implements AccessoryPlugin {
           var now = new Date()
           var duration = (now.valueOf() - this.lastLockedRequest.valueOf()) / 1000
 
-          if (duration < 60) {
-            this.log('Multiple requests within 60 seconds, ignored')
+          if (duration < this.pollInterval) {
+            this.log(`Multiple requests within ${this.pollInterval} seconds, ignored`)
             fetchState = false
           }
         }
@@ -171,11 +173,11 @@ class WeConnect implements AccessoryPlugin {
 
           try {
             await this.getCurrentState('locked').catch((error) => {
-              this.log.error('Get locked state Error: ' + error)
+              this.log.error('Get locked state' + error)
             })
           }
           catch (error) {
-            this.log.error('Try get locked state Error: ' + error)
+            this.log.error('Try get locked state' + error)
           }
         }
 
@@ -193,11 +195,11 @@ class WeConnect implements AccessoryPlugin {
             this.locked = (value == hap.Characteristic.LockTargetState.SECURED)
             success = true
           }, (error) => {
-            this.log.error('Set locked state Error: ' + error.message)
+            this.log.error('Set locked state' + error.message)
           })
         }
         catch (error) {
-          this.log.error('Try set locked state Error: ' + error)
+          this.log.error('Try set locked state' + error)
         }
         if (!success) {
           this.log('Revert to: ' + (this.locked ? 'SECURED' : 'UNSECURED'))
@@ -218,8 +220,8 @@ class WeConnect implements AccessoryPlugin {
           var now = new Date()
           var duration = (now.valueOf() - this.lastClimatisationRequest.valueOf()) / 1000
 
-          if (duration < 60) {
-            this.log('Multiple requests within 60 seconds, ignored')
+          if (duration < this.pollInterval) {
+            this.log(`Multiple requests within ${this.pollInterval} seconds, ignored`)
             return this.climatisationOn
           }
         }
@@ -228,11 +230,11 @@ class WeConnect implements AccessoryPlugin {
 
         try {
           await this.getCurrentState('climatisation').catch((error) => {
-            this.log.error('Get climatisation state Error: ' + error)
+            this.log.error('Get climatisation state' + error)
           })
         }
         catch (error) {
-          this.log.error('Try get climatisation state Error: ' + error)
+          this.log.error('Try get climatisation state' + error)
         }
         return this.climatisationOn
       })
@@ -253,7 +255,7 @@ class WeConnect implements AccessoryPlugin {
           })
         }
         catch (error) {
-          this.log.error('Try set climatisation state Error: ' + error)
+          this.log.error('Try set climatisation state' + error)
         }
       })
 
@@ -427,18 +429,23 @@ class WeConnect implements AccessoryPlugin {
     })
 
     python.stdout.on('data', (data) => {
-      let parsed = JSON.parse(data)
-      if (command == 'climatisation') {
-        this.climatisationOn = parsed.climatisation
+      try {
+        let parsed = JSON.parse(data)
+        if (command == 'climatisation') {
+          this.climatisationOn = parsed.climatisation
+        }
+        else if (command == 'locked') {
+          this.locked = parsed.locked
+        }
+        else if (command == 'charging') {
+          this.charging = parsed.charging
+          this.batteryLevel = parsed.batteryLevel
+        }
+        success = true
       }
-      else if (command == 'locked') {
-        this.locked = parsed.locked
+      catch (dataError) {
+        this.log.error('Get current state on data received: ' + dataError)
       }
-      else if (command == 'charging') {
-        this.charging = parsed.charging
-        this.batteryLevel = parsed.batteryLevel
-      }
-      success = true
     })
 
     return timeoutPromise(new Promise((resolve, reject) => {

@@ -40,8 +40,9 @@ def getClimatisationStatus(vwc, vin):
     state = climaterStatus['windowHeatingStatusData']['windowHeatingStateFront']['content'] == 'heating'
     state = climaterStatus['windowHeatingStatusData']['windowHeatingStateRear']['content'] == 'heating'
 
-    logger.info("Climater status: " + json_helpers.to_json(climaterStatus, unpicklable=False))
- 
+    logger.info("Climater status: " +
+                json_helpers.to_json(climaterStatus, unpicklable=False))
+
     return state
 
 
@@ -100,36 +101,40 @@ try:
     vwc.login()
 
     if len(vin) == 0:
-        vin = vwc.get_real_car_data()['realCars'][0]['vehicleIdentificationNumber']
+        vin = vwc.get_real_car_data(
+        )['realCars'][0]['vehicleIdentificationNumber']
 
         if vin not in carStates:
             carStates[vin] = CarState()
- 
+
         logger.info("VIN: " + vin)
     elif vin not in carStates:
         carStates[vin] = CarState()
- 
+
     if command == 'charging':
         chargerStatus = vwc.get_charger(vin)['charger']['status']
         charging = chargerStatus['chargingStatusData']['chargingState']['content'] != 'off'
         batteryLevel = chargerStatus['batteryStatusData']['stateOfCharge']['content']
- 
-        logger.info("Charging status: " + json_helpers.to_json(chargerStatus, unpicklable=False))
-        
+
+        logger.info("Charging status: " +
+                    json_helpers.to_json(chargerStatus, unpicklable=False))
+
         if value == '1':
             if not charging:
                 chargingOn = vwc.battery_charge(vin, action='on')
                 logger.info(chargingOn)
-                charging = True if (chargingOn['action']['actionState'] == 'queued' and chargingOn['action']['type'] == 'start') else True
-        elif value == '0':  
+                charging = True if (chargingOn['action']['actionState'] ==
+                                    'queued' and chargingOn['action']['type'] == 'start') else True
+        elif value == '0':
             if charging:
-                chargingOff = vwc.battery_charge(vin, action='off') 
+                chargingOff = vwc.battery_charge(vin, action='off')
                 logger.info(chargingOff)
-                charging = False if (chargingOff['action']['actionState'] == 'queued' and chargingOff['action']['type'] == 'stop') else True
+                charging = False if (chargingOff['action']['actionState'] ==
+                                     'queued' and chargingOff['action']['type'] == 'stop') else True
         elif value != 'status':
-            print('Command: ' + command + ' unknown value: ' + value)
-            exit(1)  
-    
+            logger.error('Command: ' + command + ' unknown value: ' + value)
+            exit(1)
+
         carStates[vin].charging = charging
         carStates[vin].batteryLevel = batteryLevel
         print(json_helpers.to_json(carStates[vin], unpicklable=False))
@@ -148,7 +153,7 @@ try:
                 isLocked = False
                 logger.info(response)
         elif value != 'status':
-            print('Command: ' + command + ' unknown value: ' + value)
+            logger.error('Command: ' + command + ' unknown value: ' + value)
             exit(1)
 
         carStates[vin].locked = isLocked
@@ -156,10 +161,11 @@ try:
         persistCarStates(carStates)
     elif command == 'climatisation':
         climatisationStatus = getClimatisationStatus(vwc, vin)
- 
+
         if value == '1':
             if not climatisationStatus:
-                climatisationOn = vwc.climatisation_v2(vin, action='on', temperature=temperature)
+                climatisationOn = vwc.climatisation_v2(
+                    vin, action='on', temperature=temperature)
                 time.sleep(1)
                 windowHeatingOn = vwc.window_melt(vin, action='on')
                 time.sleep(1)
@@ -170,8 +176,9 @@ try:
                 t1 = climatisationOn['action']['actionState'] == 'queued' and climatisationOn['action']['type'] == 'startClimatisation'
                 t2 = windowHeatingOn['action']['actionState'] == 'queued' and windowHeatingOn['action']['type'] == 'startWindowHeating'
 
-                climatisationStatus = True if (t1 and t2) else False  # Return State of Heating
-        elif value == '0': 
+                climatisationStatus = True if (
+                    t1 and t2) else False  # Return State of Heating
+        elif value == '0':
             if climatisationStatus:
                 climatisationOff = vwc.climatisation(vin, action='off')
                 time.sleep(1)
@@ -183,9 +190,10 @@ try:
 
                 t1 = climatisationOff['action']['actionState'] == 'queued' and climatisationOff['action']['type'] == 'stopClimatisation'
                 t2 = windowHeatingOff['action']['actionState'] == 'queued' and windowHeatingOff['action']['type'] == 'stopWindowHeating'
-                climatisationStatus = False if (t1 and t2) else True  # Return State of Heating 
+                climatisationStatus = False if (
+                    t1 and t2) else True  # Return State of Heating
         elif value != 'status':
-            print('Command: ' + command + ' unknown value: ' + value)
+            logger.error('Command: ' + command + ' unknown value: ' + value)
             exit(1)
 
         carStates[vin].climatisation = climatisationStatus

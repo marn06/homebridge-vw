@@ -24,7 +24,7 @@ logging.basicConfig(
     format='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
 
 logger = logging.getLogger('API')
-logger.setLevel(logging.getLogger().level)
+logger.setLevel('WARNING')
 
 
 class VWError(Exception):
@@ -145,8 +145,6 @@ class WeConnect():
                 logger.debug('Response error is not JSON format')
                 msg = "Error: status code {}".format(r.status_code)
             raise UrlError(r.status_code, msg, r)
-        # else:
-        #    print(r.content.decode())
         return r
 
     def __command(self, command, post=None, data=None, dashboard=None, accept='application/json', content_type=None, scope=None, secure_token=None):
@@ -385,7 +383,8 @@ class WeConnect():
                         logger.info(
                             'Successfully accepted updated terms and conditions')
                     else:
-                        logger.critical('Failed to accept new terms and conditions, try manually at: ' +  idk['templateModel']['loginUrl'])
+                        logger.critical(
+                            'Failed to accept new terms and conditions, try manually at: ' + idk['templateModel']['loginUrl'])
                     break
                 elif (metakit['content'] == 'loginAuthenticate'):
                     logger.warn('Meta identitykit is loginAuthenticate')
@@ -542,7 +541,7 @@ class WeConnect():
         return r
 
     def get_trip_data(self, vin, type='longTerm'):
-        ## type: 'longTerm', 'cyclic', 'shortTerm'
+        # type: 'longTerm', 'cyclic', 'shortTerm'
         r = self.__command('/bs/tripstatistics/v1/{brand}/{country}/vehicles/'+vin+'/tripdata/'+type+'?type=list',
                            dashboard=self.__get_fal_url(vin), scope=self.__oauth['sc2:fal'], accept=self.__accept_mbb)
         return r

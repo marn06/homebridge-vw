@@ -27,7 +27,7 @@ Thanks to Trocotronic (https://github.com/trocotronic) for the WeConnect Python 
 ```json
 "accessories": [
      {
-        "name": "VW ID.4",
+        "name": "VW Passat",
         "username": "email@domain.com",
         "password": "password",
         "spin": "0000",
@@ -50,7 +50,7 @@ Thanks to Trocotronic (https://github.com/trocotronic) for the WeConnect Python 
 | `spin` | Spin is the 4 digit code assigned to your WeConnect account | N/A |
 | `vin` | VIN of the car, if empty VIN of first car will be used | N/A |
 | `temperature` | Target temperature of climatisation | `24.0` |
-| `pollInterval` | Time (in seconds) before next poll can occur per Service | `30` |
+| `pollInterval` | Time (in seconds) before next poll can occur per Service | `60` |
   
 ### Additional options
 | Key | Description | Default |
