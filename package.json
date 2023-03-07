@@ -1,7 +1,7 @@
 {
   "name": "homebridge-vw",
   "displayName": "Homebridge VW",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Homebridge plugin for VW We Connect",
   "main": "dist/plugin.js",
   "devDependencies": {
@@ -21,7 +21,7 @@
     "python": "python3 -m venv dist/venv && dist/venv/bin/pip3 install beautifulsoup4 jsonpickle requests xmltodict",
     "build": "rimraf ./dist && tsc && copyfiles -f src/*.py dist",
     "postinstall": "node postinstall.js",
-    "release": "standard-version",
+    "release": "standard-version && git push --follow-tags",
     "deploy": "standard-version && git add . && git commit . -m release && git push --follow-tags",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
