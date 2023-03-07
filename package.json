@@ -1,7 +1,7 @@
 {
   "name": "homebridge-vw",
   "displayName": "Homebridge VW",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Homebridge plugin for VW We Connect",
   "main": "dist/plugin.js",
   "devDependencies": {
@@ -22,7 +22,7 @@
     "build": "rimraf ./dist && tsc && copyfiles -f src/*.py dist",
     "postinstall": "node postinstall.js",
     "release": "standard-version",
-    "deploy": "standard-version && git add . && git commit . -m release && git push",
+    "deploy": "standard-version && git add . && git commit . -m release && git push --follow-tags",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
