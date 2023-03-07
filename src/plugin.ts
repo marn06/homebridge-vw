@@ -114,13 +114,13 @@ class WeConnect implements AccessoryPlugin {
 
     this.batteryService = new hap.Service.Battery(this.name)
 
-    this.batteryService.getCharacteristic(hap.Characteristic.StatusLowBattery)
-      .onGet(async () => {
-        if (this.batteryLevel < 10) {
-          return hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
-        }
-        return hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
-      })
+    /*     this.batteryService.getCharacteristic(hap.Characteristic.StatusLowBattery)
+          .onGet(async () => {
+            if (this.batteryLevel < 10) {
+              return hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
+            }
+            return hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
+          }) */
 
     this.batteryService.getCharacteristic(hap.Characteristic.BatteryLevel)
       .onGet(async () => {
@@ -421,7 +421,6 @@ class WeConnect implements AccessoryPlugin {
 
     let success = false
     let error: string | undefined = undefined
-    let currentState = false
 
     python.stderr.on('data', (data) => {
       error = data

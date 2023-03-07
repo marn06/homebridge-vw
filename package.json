@@ -21,8 +21,7 @@
     "python": "python3 -m venv dist/venv && dist/venv/bin/pip3 install beautifulsoup4 jsonpickle requests xmltodict",
     "build": "rimraf ./dist && tsc && copyfiles -f src/*.py dist",
     "postinstall": "node postinstall.js",
-    "release": "standard-version && git push --follow-tags",
-    "deploy": "standard-version && git add . && git commit . -m release && git push --follow-tags",
+    "release": "git add . && git commit . -m release && standard-version && git push --follow-tags origin master",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
