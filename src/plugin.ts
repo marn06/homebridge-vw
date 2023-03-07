@@ -108,7 +108,7 @@ class WeConnect implements AccessoryPlugin {
           })
         }
         catch (error) {
-          this.log.error('Try set charging state Error: ' + error)
+          this.log.error('Try set charging state: ' + error)
         }
       })
 
@@ -140,11 +140,11 @@ class WeConnect implements AccessoryPlugin {
 
         try {
           await this.getCurrentState('charging').catch((error) => {
-            this.log.error('Get battery state' + error)
+            this.log.error('Get battery state: ' + error)
           })
         }
         catch (error) {
-          this.log.error('Try get battery state' + error)
+          this.log.error('Try get battery state: ' + error)
         }
 
         const chargingState = this.charging ? hap.Characteristic.ChargingState.CHARGING : hap.Characteristic.ChargingState.NOT_CHARGING
@@ -173,11 +173,11 @@ class WeConnect implements AccessoryPlugin {
 
           try {
             await this.getCurrentState('locked').catch((error) => {
-              this.log.error('Get locked state' + error)
+              this.log.error('Get locked state: ' + error)
             })
           }
           catch (error) {
-            this.log.error('Try get locked state' + error)
+            this.log.error('Try get locked state: ' + error)
           }
         }
 
@@ -195,11 +195,11 @@ class WeConnect implements AccessoryPlugin {
             this.locked = (value == hap.Characteristic.LockTargetState.SECURED)
             success = true
           }, (error) => {
-            this.log.error('Set locked state' + error.message)
+            this.log.error('Set locked state: ' + error.message)
           })
         }
         catch (error) {
-          this.log.error('Try set locked state' + error)
+          this.log.error('Try set locked state: ' + error)
         }
         if (!success) {
           this.log('Revert to: ' + (this.locked ? 'SECURED' : 'UNSECURED'))
@@ -230,11 +230,11 @@ class WeConnect implements AccessoryPlugin {
 
         try {
           await this.getCurrentState('climatisation').catch((error) => {
-            this.log.error('Get climatisation state' + error)
+            this.log.error('Get climatisation state: ' + error)
           })
         }
         catch (error) {
-          this.log.error('Try get climatisation state' + error)
+          this.log.error('Try get climatisation state: ' + error)
         }
         return this.climatisationOn
       })
@@ -255,7 +255,7 @@ class WeConnect implements AccessoryPlugin {
           })
         }
         catch (error) {
-          this.log.error('Try set climatisation state' + error)
+          this.log.error('Try set climatisation state: ' + error)
         }
       })
 
