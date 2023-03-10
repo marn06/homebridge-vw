@@ -25,7 +25,7 @@ logging.basicConfig(
 
 logger = logging.getLogger('API')
 logger.setLevel('WARNING')
-
+ 
 
 class VWError(Exception):
     def __init__(self, message):

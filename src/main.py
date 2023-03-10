@@ -37,8 +37,8 @@ def getCarStates() -> CarStates:
 def getClimatisationStatus(vwc, vin):
     climaterStatus = vwc.get_climater(vin)['climater']['status']
     state = climaterStatus['climatisationStatusData']['climatisationState']['content'] == 'heating'
-    #state = climaterStatus['windowHeatingStatusData']['windowHeatingStateFront']['content'] == 'heating'
-    state = climaterStatus['windowHeatingStatusData']['windowHeatingStateRear']['content'] == 'heating'
+    #state = climaterStatus['windowHeatingStatusData']['windowHeatingStateFront']['content'] == 'on'
+    state = climaterStatus['windowHeatingStatusData']['windowHeatingStateRear']['content'] == 'on'
 
     logger.info("Climater status: " +
                 json_helpers.to_json(climaterStatus, unpicklable=False))
