@@ -20,11 +20,9 @@ import logging
 from vsr import VSR
 from credentials import Credentials
 
-logging.basicConfig(
-    format='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
-
+# Uses logging.basicConfig from main.py
 logger = logging.getLogger('API')
-logger.setLevel('WARNING')
+logger.setLevel(logging.DEBUG)
 
 class VWError(Exception):
     def __init__(self, message):

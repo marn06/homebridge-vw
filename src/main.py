@@ -82,16 +82,17 @@ if len(sys.argv) >= 7:
 if len(sys.argv) >= 8:
     temperature = float(sys.argv[7])
 
-logFormatter = logging.Formatter(
-    fmt='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
-logging.basicConfig(format=logFormatter.format, datefmt=logFormatter.datefmt)
+logging.basicConfig(
+    level=logging.INFO,
+    format='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s',
+    datefmt='%d/%m/%Y %H:%M:%S',
+    handlers=[
+        logging.FileHandler('weconnect.log'),
+        logging.StreamHandler()
+    ]
+)   
 
 logger = logging.getLogger('WeConnect')
-logger.setLevel(logging.INFO)
-
-fileHandler = logging.FileHandler('weconnect.log')
-fileHandler.setFormatter(logFormatter)
-logger.addHandler(fileHandler)
 
 carStates = getCarStates()
 
