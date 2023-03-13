@@ -193,7 +193,7 @@ try:
                 climatisationStatus = False if (
                     t1 and t2) else True  # Return State of Heating
         elif value != 'status':
-            logger.error('Command: ' + command + ' unknown value: ' + value)
+            logger.error('Command: ' + command + ' unknown value: ' + value) 
             exit(1)
 
         carStates[vin].climatisation = climatisationStatus

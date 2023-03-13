@@ -25,7 +25,6 @@ logging.basicConfig(
 
 logger = logging.getLogger('API')
 logger.setLevel('WARNING')
- 
 
 class VWError(Exception):
     def __init__(self, message):
@@ -135,15 +134,24 @@ class WeConnect():
                 e = r.json()
                 msg = 'Error {}'.format(r.status_code)
                 logger.debug('Response error in JSON format')
-                if ('error' in e):
+                if ('error' in e): 
                     msg += ':'
+                    if (isinstance(e['error'], str)):
+                        msg += ' [{}]'.format(e['error'])
                     if ('errorCode' in e['error']):
                         msg += ' [{}]'.format(e['error']['errorCode'])
                     if ('description' in e['error']):
                         msg += ' '+e['error']['description']
-            except ValueError:
+                    if ('error_description' in e):
+                        msg += ' '+e['error_description']
+                    
+                    #TODO: It should not just delete the file it should fine the real cause.
+                    logger.debug("Removing ACCESS FILE (This is a temporary fix, actual cause should be found)")
+                    os.remove(self.ACCESS_FILE)
+            except ValueError: 
                 logger.debug('Response error is not JSON format')
                 msg = "Error: status code {}".format(r.status_code)
+
             raise UrlError(r.status_code, msg, r)
         return r
 
@@ -226,6 +234,8 @@ class WeConnect():
                 self.__oauth = d['oauth']
         except FileNotFoundError:
             logger.warning('Access file not found')
+        except Exception as ex:
+            logger.warning(ex)   
         self.__session.mount("carnet://", CarNetAdapter())
 
     def __refresh_oauth_scope(self, scope):
