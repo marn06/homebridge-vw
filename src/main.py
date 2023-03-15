@@ -34,34 +34,47 @@ def getCarStates() -> CarStates:
             return CarStates()
 
 
-def getClimatisationStatus(vwc, vin):
+def setClimatisationStatus(vwc, vin):
     climaterStatus = vwc.get_climater(vin)['climater']['status']
     state = climaterStatus['climatisationStatusData']['climatisationState']['content'] == 'heating'
     #state = climaterStatus['windowHeatingStatusData']['windowHeatingStateFront']['content'] == 'on'
     state = climaterStatus['windowHeatingStatusData']['windowHeatingStateRear']['content'] == 'on'
 
-    logger.info("Climater status: " +
+    logger.info('Climater status: ' +
                 json_helpers.to_json(climaterStatus, unpicklable=False))
 
-    return state
+    carStates[vin].climatisation = state
 
 
-def getLockedStatus(vwc, vin):
+def setLockedStatus(vwc, vin):
     vsr = vwc.get_vsr(vin)
     pvsr = vwc.parse_vsr(vsr)
     doors = pvsr.get('doors', [])
     avdoors = {'left_front': 'Left front', 'right_front': 'Right front',
                'left_rear': 'Left rear', 'right_rear': 'Right rear', 'trunk': 'Trunk'}
 
-    logger.info("Doors status: " +
+    logger.info('Doors status: ' +
                 json_helpers.to_json(doors, unpicklable=False))
 
     for d in avdoors.items():
         locked = doors.get('lock_'+d[0], '')
         if (locked != 'locked'):
-            return False
+            carStates[vin].locked = False
+            return
+        
+    carStates[vin].locked = True
 
-    return True
+
+def setChargingStatus(vwc, vin):
+    chargerStatus = vwc.get_charger(vin)['charger']['status']
+    charging = chargerStatus['chargingStatusData']['chargingState']['content'] != 'off'
+    batteryLevel = chargerStatus['batteryStatusData']['stateOfCharge']['content']
+
+    logger.info('Charging status: ' +
+        json_helpers.to_json(chargerStatus, unpicklable=False))
+    
+    carStates[vin].charging = charging 
+    carStates[vin].batteryLevel = batteryLevel
 
 
 if len(sys.argv) >= 6:
@@ -108,63 +121,48 @@ try:
         if vin not in carStates:
             carStates[vin] = CarState()
 
-        logger.info("VIN: " + vin)
+        logger.info('VIN: ' + vin)
     elif vin not in carStates:
         carStates[vin] = CarState()
 
+    setLockedStatus(vwc, vin)
+    setClimatisationStatus(vwc, vin)
+    setChargingStatus(vwc, vin)
+
     if command == 'charging':
-        chargerStatus = vwc.get_charger(vin)['charger']['status']
-        charging = chargerStatus['chargingStatusData']['chargingState']['content'] != 'off'
-        batteryLevel = chargerStatus['batteryStatusData']['stateOfCharge']['content']
-
-        logger.info("Charging status: " +
-                    json_helpers.to_json(chargerStatus, unpicklable=False))
-
         if value == '1':
-            if not charging:
+            if not carStates[vin].charging:
                 chargingOn = vwc.battery_charge(vin, action='on')
                 logger.info(chargingOn)
-                charging = True if (chargingOn['action']['actionState'] ==
+                carStates[vin].charging = True if (chargingOn['action']['actionState'] ==
                                     'queued' and chargingOn['action']['type'] == 'start') else True
+                
         elif value == '0':
-            if charging:
+            if carStates[vin].charging:
                 chargingOff = vwc.battery_charge(vin, action='off')
                 logger.info(chargingOff)
-                charging = False if (chargingOff['action']['actionState'] ==
+                carStates[vin].charging = False if (chargingOff['action']['actionState'] ==
                                      'queued' and chargingOff['action']['type'] == 'stop') else True
         elif value != 'status':
             logger.error('Command: ' + command + ' unknown value: ' + value)
             exit(1)
-
-        carStates[vin].charging = charging
-        carStates[vin].batteryLevel = batteryLevel
-        print(json_helpers.to_json(carStates[vin], unpicklable=False))
-        persistCarStates(carStates)
-    elif command == 'locked':
-        isLocked = getLockedStatus(vwc, vin)
-
+    elif command == 'locked': 
         if value == '1':
-            if not isLocked:
+            if not carStates[vin].locked:
                 response = vwc.lock(vin, action='lock')
-                isLocked = True
+                carStates[vin].locked = True
                 logger.info(response)
         elif value == '0':
-            if isLocked:
+            if carStates[vin].locked:
                 response = vwc.lock(vin, action='unlock')
-                isLocked = False
+                carStates[vin].locked = False
                 logger.info(response)
         elif value != 'status':
             logger.error('Command: ' + command + ' unknown value: ' + value)
             exit(1)
-
-        carStates[vin].locked = isLocked
-        print(json_helpers.to_json(carStates[vin], unpicklable=False))
-        persistCarStates(carStates)
     elif command == 'climatisation':
-        climatisationStatus = getClimatisationStatus(vwc, vin)
-
         if value == '1':
-            if not climatisationStatus:
+            if not carStates[vin].climatisation:
                 climatisationOn = vwc.climatisation_v2(
                     vin, action='on', temperature=temperature)
                 time.sleep(1)
@@ -177,10 +175,10 @@ try:
                 t1 = climatisationOn['action']['actionState'] == 'queued' and climatisationOn['action']['type'] == 'startClimatisation'
                 t2 = windowHeatingOn['action']['actionState'] == 'queued' and windowHeatingOn['action']['type'] == 'startWindowHeating'
 
-                climatisationStatus = True if (
+                carStates[vin].climatisation = True if (
                     t1 and t2) else False  # Return State of Heating
         elif value == '0':
-            if climatisationStatus:
+            if carStates[vin].climatisation:
                 climatisationOff = vwc.climatisation(vin, action='off')
                 time.sleep(1)
                 windowHeatingOff = vwc.window_melt(vin, action='off')
@@ -191,22 +189,22 @@ try:
 
                 t1 = climatisationOff['action']['actionState'] == 'queued' and climatisationOff['action']['type'] == 'stopClimatisation'
                 t2 = windowHeatingOff['action']['actionState'] == 'queued' and windowHeatingOff['action']['type'] == 'stopWindowHeating'
-                climatisationStatus = False if (
+                carStates[vin].climatisation = False if (
                     t1 and t2) else True  # Return State of Heating
         elif value != 'status':
             logger.error('Command: ' + command + ' unknown value: ' + value) 
             exit(1)
-
-        carStates[vin].climatisation = climatisationStatus
-        print(json_helpers.to_json(carStates[vin], unpicklable=False))
-        persistCarStates(carStates)
     else:
         logger.error('Unknown command')
+        exit(1)
+
+    print(json_helpers.to_json(carStates[vin], unpicklable=False))
+    persistCarStates(carStates)
 
 except VWError as e:
     if 'login.error' in e.message:
         logger.error('VWError: Failed to login')
     else:
-        logger.error("VWError: " + e.message)
+        logger.error('VWError: ' + e.message)
 except Exception as e:
-    logger.error("Fatal Error: " + str(e))
+    logger.error('Fatal Error: ' + str(e))

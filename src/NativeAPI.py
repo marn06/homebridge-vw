@@ -22,8 +22,8 @@ from credentials import Credentials
 
 # Uses logging.basicConfig from main.py
 logger = logging.getLogger('API')
-logger.setLevel(logging.DEBUG)
-
+logger.setLevel(logging.WARNING)
+ 
 class VWError(Exception):
     def __init__(self, message):
         self.message = message
@@ -143,12 +143,12 @@ class WeConnect():
                     if ('error_description' in e):
                         msg += ' '+e['error_description']
                     
-                    #TODO: It should not just delete the file it should fine the real cause.
-                    logger.debug("Removing ACCESS FILE (This is a temporary fix, actual cause should be found)")
+                    #TODO: It should not just delete the file it should find the real cause.
+                    logger.debug('Removing ACCESS FILE (This is a temporary fix, actual cause should be found)')
                     os.remove(self.ACCESS_FILE)
             except ValueError: 
                 logger.debug('Response error is not JSON format')
-                msg = "Error: status code {}".format(r.status_code)
+                msg = 'Error: status code {}'.format(r.status_code)
 
             raise UrlError(r.status_code, msg, r)
         return r
@@ -224,7 +224,7 @@ class WeConnect():
             logger.warning('Session file not found')
         try:
             with open(WeConnect.ACCESS_FILE, 'rb') as f:
-                d = json.load(f)
+                d = json.load(f) 
                 self.__identities = d['identities']
                 self.__identity_kit = d['identity_kit']
                 self.__tokens = d['tokens']
@@ -300,7 +300,6 @@ class WeConnect():
         logger.info('Saving access to file')
 
     def login(self):
-        logger.info('logger')
         if (not self.__check_tokens()):
             return self.__force_login()
         return True
