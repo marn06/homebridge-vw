@@ -1,72 +1,83 @@
 {
-    "pluginAlias": "WeConnect",
-    "pluginType": "accessory",
-    "singular": false,
-    "schema": {
-        "type": "object",
-        "properties": {
-            "name": {
-                "title": "Accessory Name",
-                "default": "WeConnect",
-                "type": "string",
-                "required": true
-            },
-            "climaterName": {
-                "title": "Climater Name",
-                "default": "Climatisation",
-                "type": "string"
-            },
-            "lockName": {
-                "title": "Lock Name",
-                "default": "Doors",
-                "type": "string"
-            },
-            "chargingSwitchName": {
-                "title": "Charging Switch Name",
-                "default": "Charging",
-                "type": "string"
-            },
-            "username": {
-                "title": "Username",
-                "type": "string",
-                "default": "email",
-                "description": "Is the username (email) assigned to your WeConnect account",
-                "required": true
-            },
-            "vin": {
-                "title": "VIN",
-                "type": "string",
-                "default": "",
-                "description": "VIN of the car, if empty VIN of first car will be used"
-            },
-            "password": {
-                "title": "Password",
-                "type": "string",
-                "default": "password",
-                "description": "Is the password assigned to your WeConnect account",
-                "required": true
-            },
-            "spin": {
-                "title": "Spin",
-                "type": "string",
-                "default": "0000",
-                "description": "Spin is the 4 digit code assigned to your WeConnect account",
-                "required": true
-            },
-            "pollInterval": {
-                "title": "Poll Interval",
-                "type": "number",
-                "default": 300,
-                "description": "How often to request for changes in seconds"
-            },
-            "temperature": {
-                "title": "Temperature",
-                "type": "number",
-                "minimum": 16.0,
-                "maximum": 29.5,
-                "default": 24.0,
-                "description": "Desired temperature of climatisation"
-            }
-        }
+  "pluginAlias": "WeConnect",
+  "pluginType": "accessory",
+  "singular": false,
+  "schema": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "Accessory Name",
+        "default": "WeConnect",
+        "type": "string",
+        "required": true
+      },
+      "climaterName": {
+        "title": "Climater Name",
+        "default": "Climatisation",
+        "type": "string"
+      },
+      "windowHeatingName": {
+        "title": "Window Heating Name",
+        "default": "Window Heating",
+        "type": "string"
+      },
+      "lockName": {
+        "title": "Lock Name",
+        "default": "Doors",
+        "type": "string"
+      },
+      "chargingSwitchName": {
+        "title": "Charging Switch Name",
+        "default": "Charging",
+        "type": "string"
+      },
+      "username": {
+        "title": "Username",
+        "type": "string",
+        "default": "email",
+        "description": "Is the username (email) assigned to your WeConnect account",
+        "required": true
+      },
+      "vin": {
+        "title": "VIN",
+        "type": "string",
+        "default": "",
+        "description": "VIN of the car, if empty VIN of first car will be used"
+      },
+      "password": {
+        "title": "Password",
+        "type": "string",
+        "default": "password",
+        "description": "Is the password assigned to your WeConnect account",
+        "required": true
+      },
+      "spin": {
+        "title": "Spin",
+        "type": "string",
+        "default": "0000",
+        "description": "Spin is the 4 digit code assigned to your WeConnect account",
+        "required": true
+      },
+      "pollInterval": {
+        "title": "Poll Interval",
+        "type": "number",
+        "default": 300,
+        "description": "How often to request for changes in seconds"
+      },
+      "temperature": {
+        "title": "Temperature",
+        "type": "number",
+        "minimum": 16.0,
+        "maximum": 29.5,
+        "default": 24.0,
+        "description": "Desired temperature of climatisation"
+      },
+      "combineHeating": {
+        "title": "Combine Heating",
+        "type": "boolean",
+        "default": true,
+        "description": "Climatisation will with combine heating also start window heating"
+      }
     }
+  }
 }

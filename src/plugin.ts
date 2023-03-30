@@ -26,14 +26,11 @@ class WeConnect implements AccessoryPlugin {
   private readonly config: AccessoryConfig;
   private readonly name: string;
   private readonly climaterName: string;
+  private readonly windowHeatingName: string;
   private readonly lockName: string;
   private readonly chargingSwitchName: string;
-  private readonly username: string;
-  private readonly password: string;
-  private readonly spin: string;
-  private readonly vin: string;
-  private readonly temperature: number;
   private readonly pollInterval: number;
+  private readonly combineHeating: boolean;
 
   private readonly manufacturer: string;
   private readonly model: string;
@@ -41,6 +38,7 @@ class WeConnect implements AccessoryPlugin {
 
   private lastStatusRequest: Date | undefined = undefined;
   private climatisationOn = false;
+  private windowHeatingOn = false;
   private locked = false;
   private charging = false;
   private batteryLevel = 0;
@@ -48,6 +46,7 @@ class WeConnect implements AccessoryPlugin {
   private getStatusPromise: Promise<void> | undefined = undefined;
 
   private readonly climatisationService: Service;
+  private readonly windowHeatingService: Service;
   private readonly lockService: Service;
   private readonly batteryService: Service;
   private readonly chargingSwitchService: Service;
@@ -56,26 +55,37 @@ class WeConnect implements AccessoryPlugin {
     this.log = log;
     this.config = config;
 
+    config["temperature"] = config["temperature"] || 24.0;
+    config["vin"] = config["vin"] || "";
+    config["combineHeating"] = config["combineHeating"] || false;
+
     this.name = config.name;
     this.climaterName = config["climaterName"] || "Climatisation";
+    this.windowHeatingName = config["windowHeatingName"] || "Window Heating";
     this.lockName = config["lockName"] || "Doors";
     this.chargingSwitchName = config["chargingSwitchName"] || "Charging";
-    this.username = config["username"];
-    this.password = config["password"];
-    this.spin = config["spin"];
-    this.vin = config["vin"] || "";
-    this.temperature = config["temperature"] || 24.0;
     this.pollInterval = config["pollInterval"] || 60.0;
+    this.combineHeating = config["combineHeating"] || false;
 
     this.manufacturer = config["manufacturer"] || packageJson["author"];
     this.model = config["model"] || packageJson["name"];
     this.serial = config["serial"] || packageJson["version"];
 
-    this.climatisationService = new hap.Service.Fan(this.name);
+    this.climatisationService = new hap.Service.Fan(this.name, "Climatisation");
     this.climatisationService
       .getCharacteristic(hap.Characteristic.ConfiguredName)
       .onGet(async () => {
         return this.climaterName;
+      });
+
+    this.windowHeatingService = new hap.Service.Fan(
+      this.name,
+      "Window Heating"
+    );
+    this.windowHeatingService
+      .getCharacteristic(hap.Characteristic.ConfiguredName)
+      .onGet(async () => {
+        return this.windowHeatingName;
       });
 
     this.lockService = new hap.Service.LockMechanism(this.name);
@@ -123,15 +133,6 @@ class WeConnect implements AccessoryPlugin {
       });
 
     this.batteryService = new hap.Service.Battery(this.name);
-
-    /*     this.batteryService.getCharacteristic(hap.Characteristic.StatusLowBattery)
-          .onGet(async () => {
-            if (this.batteryLevel < 10) {
-              return hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
-            }
-            return hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
-          }) */
-
     this.batteryService
       .getCharacteristic(hap.Characteristic.BatteryLevel)
       .onGet(async () => {
@@ -143,16 +144,15 @@ class WeConnect implements AccessoryPlugin {
             (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
 
           if (duration < this.pollInterval) {
-            this.log(
-              `Multiple requests within ${this.pollInterval} seconds, retrieving cached state`
-            );
+            this.log(`Multiple requests within ${this.pollInterval} seconds`);
             if (this.getStatusPromise) {
               await this.getStatusPromise;
+              this.log(`Battery level: ${this.batteryLevel}`);
+              this.log(`Charging: ${this.charging}`);
+            } else {
+              this.log(`Last known battery level: ${this.batteryLevel}`);
+              this.log(`Last known state of charging: ${this.charging}`);
             }
-            this.log(
-              `Battery level: ${this.batteryLevel} retrieved from cache`
-            );
-            this.log(`Charging: ${this.charging} retrieved from cache`);
             return this.batteryLevel;
           }
         }
@@ -160,11 +160,9 @@ class WeConnect implements AccessoryPlugin {
         this.lastStatusRequest = new Date();
 
         try {
-          this.getStatusPromise = this.getCurrentState("charging").catch(
-            (error) => {
-              this.log.error("Get battery state: " + error);
-            }
-          );
+          this.getStatusPromise = this.getCurrentState().catch((error) => {
+            this.log.error("Get battery state: " + error);
+          });
           await this.getStatusPromise;
         } catch (error) {
           this.log.error("Try get battery state: " + error);
@@ -183,7 +181,7 @@ class WeConnect implements AccessoryPlugin {
     this.lockService
       .getCharacteristic(hap.Characteristic.LockCurrentState)
       .onGet(async () => {
-        this.log("Get locked state");
+        this.log.info("Get locked state");
 
         let fetchState = true;
         if (this.lastStatusRequest != undefined) {
@@ -192,11 +190,14 @@ class WeConnect implements AccessoryPlugin {
             (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
 
           if (duration < this.pollInterval) {
-            this.log(
-              `Multiple requests within ${this.pollInterval} seconds, retrieving cached state`
+            this.log.info(
+              `Multiple requests within ${this.pollInterval} seconds`
             );
             if (this.getStatusPromise) {
               await this.getStatusPromise;
+              this.log.info(`Locked: ${this.locked}`);
+            } else {
+              this.log.info(`Last known state of locked: ${this.locked}`);
             }
             fetchState = false;
           }
@@ -206,11 +207,9 @@ class WeConnect implements AccessoryPlugin {
           this.lastStatusRequest = new Date();
 
           try {
-            this.getStatusPromise = this.getCurrentState("locked").catch(
-              (error) => {
-                this.log.error("Get locked state: " + error);
-              }
-            );
+            this.getStatusPromise = this.getCurrentState().catch((error) => {
+              this.log.error("Get locked state: " + error);
+            });
             await this.getStatusPromise;
           } catch (error) {
             this.log.error("Try get locked state: " + error);
@@ -224,9 +223,6 @@ class WeConnect implements AccessoryPlugin {
           .getCharacteristic(hap.Characteristic.LockTargetState)
           .updateValue(lockState);
 
-        if (!fetchState) {
-          this.log(`Locked: ${this.locked} retrieved from cache`);
-        }
         return lockState;
       });
 
@@ -278,7 +274,7 @@ class WeConnect implements AccessoryPlugin {
     this.climatisationService
       .getCharacteristic(hap.Characteristic.On)
       .onGet(async () => {
-        this.log("Get climatisation state");
+        this.log.info("Get climatisation state");
 
         if (this.lastStatusRequest != undefined) {
           var now = new Date();
@@ -286,15 +282,17 @@ class WeConnect implements AccessoryPlugin {
             (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
 
           if (duration < this.pollInterval) {
-            this.log(
-              `Multiple requests within ${this.pollInterval} seconds, retrieving cached state`
+            this.log.info(
+              `Multiple requests within ${this.pollInterval} seconds`
             );
             if (this.getStatusPromise) {
               await this.getStatusPromise;
+              this.log.info(`Climatisation: ${this.climatisationOn}`);
+            } else {
+              this.log.info(
+                `Last known state of climatisation: ${this.climatisationOn}`
+              );
             }
-            this.log(
-              `Climatisation: ${this.climatisationOn} retrieved from cache`
-            );
             return this.climatisationOn;
           }
         }
@@ -302,11 +300,9 @@ class WeConnect implements AccessoryPlugin {
         this.lastStatusRequest = new Date();
 
         try {
-          this.getStatusPromise = this.getCurrentState("climatisation").catch(
-            (error) => {
-              this.log.error("Get climatisation state: " + error);
-            }
-          );
+          this.getStatusPromise = this.getCurrentState().catch((error) => {
+            this.log.error("Get climatisation state: " + error);
+          });
           await this.getStatusPromise;
         } catch (error) {
           this.log.error("Try get climatisation state: " + error);
@@ -339,6 +335,72 @@ class WeConnect implements AccessoryPlugin {
         }
       });
 
+    this.windowHeatingService
+      .getCharacteristic(hap.Characteristic.On)
+      .onGet(async () => {
+        this.log.info("Get window heating state");
+
+        if (this.lastStatusRequest != undefined) {
+          var now = new Date();
+          var duration =
+            (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
+
+          if (duration < this.pollInterval) {
+            this.log.info(
+              `Multiple requests within ${this.pollInterval} seconds`
+            );
+            if (this.getStatusPromise) {
+              await this.getStatusPromise;
+              this.log.info(`Window heating: ${this.windowHeatingOn}`);
+            } else {
+              this.log.info(
+                `Last known state of window heating: ${this.windowHeatingOn}`
+              );
+            }
+            return this.windowHeatingOn;
+          }
+        }
+
+        this.lastStatusRequest = new Date();
+
+        try {
+          this.getStatusPromise = this.getCurrentState().catch((error) => {
+            this.log.error("Get window heating state: " + error);
+          });
+          await this.getStatusPromise;
+        } catch (error) {
+          this.log.error("Try get window heating state: " + error);
+        }
+        return this.windowHeatingOn;
+      });
+
+    this.windowHeatingService
+      .getCharacteristic(hap.Characteristic.On)
+      .onSet(async (value: CharacteristicValue) => {
+        this.log(`Set window heating state ${value}`);
+
+        try {
+          await this.setCurrentState("windowHeating", value ? "1" : "0").then(
+            () => {
+              this.windowHeatingOn = value == "1";
+              log("Window Heating: " + (this.windowHeatingOn ? "ON" : "OFF"));
+            },
+            (error) => {
+              this.log.error(
+                "Set window heating state Error: " + error.message
+              );
+              setTimeout(() => {
+                this.windowHeatingService
+                  .getCharacteristic(hap.Characteristic.On)
+                  .updateValue(!value);
+              }, 1000); // Go back to old value if error
+            }
+          );
+        } catch (error) {
+          this.log.error("Try set window heating state: " + error);
+        }
+      });
+
     this.informationService = new hap.Service.AccessoryInformation()
       .setCharacteristic(hap.Characteristic.Manufacturer, this.manufacturer)
       .setCharacteristic(hap.Characteristic.Model, this.model)
@@ -358,13 +420,9 @@ class WeConnect implements AccessoryPlugin {
   async setCurrentState(command: string, value: string): Promise<void> {
     let python = spawn(join(__dirname, "/venv/bin/python3"), [
       join(__dirname, "main.py"),
-      this.username,
-      this.password,
-      this.spin,
+      JSON.stringify(this.config),
       command,
       value,
-      this.vin,
-      this.temperature!.toString(),
     ]);
 
     let success = false;
@@ -379,7 +437,11 @@ class WeConnect implements AccessoryPlugin {
     python.stdout.on("data", (data) => {
       let parsed = JSON.parse(data);
       if (command == "climatisation") {
-        currentState = parsed.climatisation;
+        currentState = this.combineHeating
+          ? parsed.climatisation && parsed.windowHeating
+          : parsed.climatisation;
+      } else if (command == "window-heating") {
+        currentState = parsed.windowHeating;
       } else if (command == "locked") {
         currentState = parsed.locked;
       } else if (command == "charging") {
@@ -444,6 +506,8 @@ class WeConnect implements AccessoryPlugin {
               state = this.locked;
             } else if (command == "climatisation") {
               state = this.climatisationOn;
+            } else if (command == "window-heating") {
+              state = this.windowHeatingOn;
             }
 
             console.log(
@@ -495,14 +559,21 @@ class WeConnect implements AccessoryPlugin {
                 );
               }
               resolve(success);
-            } else if (command == "climatisation") {
+            } else if (
+              command == "climatisation" ||
+              command == "window-heating"
+            ) {
+              const service =
+                command == "climatisation"
+                  ? this.climatisationService
+                  : this.windowHeatingService;
               if (success) {
-                this.climatisationService
+                service
                   .getCharacteristic(hap.Characteristic.On)
                   .updateValue(state);
               } else if (tryNumber == maxTries) {
                 // If failed after max tries revert to actual state
-                this.climatisationService
+                service
                   .getCharacteristic(hap.Characteristic.On)
                   .updateValue(state);
                 console.log(
@@ -532,15 +603,12 @@ class WeConnect implements AccessoryPlugin {
     }
   }
 
-  async getCurrentState(command: string): Promise<void> {
+  async getCurrentState(command: string = ""): Promise<void> {
     let python = spawn(join(__dirname, "/venv/bin/python3"), [
       join(__dirname, "main.py"),
-      this.username,
-      this.password,
-      this.spin,
+      JSON.stringify(this.config),
       command,
       "status",
-      this.vin,
     ]);
 
     let success = false;
@@ -554,7 +622,10 @@ class WeConnect implements AccessoryPlugin {
     python.stdout.on("data", (data) => {
       try {
         let parsed = JSON.parse(data);
-        this.climatisationOn = parsed.climatisation;
+        this.climatisationOn = this.combineHeating
+          ? parsed.climatisation && parsed.windowHeating
+          : parsed.climatisation;
+        this.windowHeatingOn = parsed.windowHeating;
         this.locked = parsed.locked;
         this.charging = parsed.charging;
         this.batteryLevel = parsed.batteryLevel;
@@ -588,6 +659,7 @@ class WeConnect implements AccessoryPlugin {
       this.informationService,
       this.lockService,
       this.climatisationService,
+      this.windowHeatingService,
       this.batteryService,
       this.chargingSwitchService,
     ];
