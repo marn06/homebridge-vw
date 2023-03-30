@@ -5,3 +5,4 @@ weconnectAPI.session
 *.log
 dist
 carStates.json
+dev.js
