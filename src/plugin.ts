@@ -45,6 +45,7 @@ class WeConnect implements AccessoryPlugin {
 
   private getStatusPromise: Promise<void> | undefined = undefined;
 
+  private readonly services: Service[] = [];
   private readonly climatisationService: Service;
   private readonly windowHeatingService: Service;
   private readonly lockService: Service;
@@ -77,16 +78,21 @@ class WeConnect implements AccessoryPlugin {
       .onGet(async () => {
         return this.climaterName;
       });
+    this.services.push(this.climatisationService);
 
     this.windowHeatingService = new hap.Service.Fan(
       this.name,
       "Window Heating"
     );
-    this.windowHeatingService
-      .getCharacteristic(hap.Characteristic.ConfiguredName)
-      .onGet(async () => {
-        return this.windowHeatingName;
-      });
+
+    if (!this.combineHeating) {
+      this.windowHeatingService
+        .getCharacteristic(hap.Characteristic.ConfiguredName)
+        .onGet(async () => {
+          return this.windowHeatingName;
+        });
+      this.services.push(this.windowHeatingService);
+    }
 
     this.lockService = new hap.Service.LockMechanism(this.name);
     this.lockService
@@ -94,6 +100,7 @@ class WeConnect implements AccessoryPlugin {
       .onGet(async () => {
         return this.lockName;
       });
+    this.services.push(this.lockService);
 
     this.chargingSwitchService = new hap.Service.Switch(this.name);
     this.chargingSwitchService
@@ -101,6 +108,10 @@ class WeConnect implements AccessoryPlugin {
       .onGet(async () => {
         return this.chargingSwitchName;
       });
+    this.services.push(this.chargingSwitchService);
+
+    this.batteryService = new hap.Service.Battery(this.name);
+    this.services.push(this.batteryService);
 
     this.chargingSwitchService
       .getCharacteristic(hap.Characteristic.On)
@@ -132,7 +143,6 @@ class WeConnect implements AccessoryPlugin {
         }
       });
 
-    this.batteryService = new hap.Service.Battery(this.name);
     this.batteryService
       .getCharacteristic(hap.Characteristic.BatteryLevel)
       .onGet(async () => {
@@ -335,76 +345,80 @@ class WeConnect implements AccessoryPlugin {
         }
       });
 
-    this.windowHeatingService
-      .getCharacteristic(hap.Characteristic.On)
-      .onGet(async () => {
-        this.log.info("Get window heating state");
+    if (!this.combineHeating) {
+      this.windowHeatingService
+        .getCharacteristic(hap.Characteristic.On)
+        .onGet(async () => {
+          this.log.info("Get window heating state");
 
-        if (this.lastStatusRequest != undefined) {
-          var now = new Date();
-          var duration =
-            (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
+          if (this.lastStatusRequest != undefined) {
+            var now = new Date();
+            var duration =
+              (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
 
-          if (duration < this.pollInterval) {
-            this.log.info(
-              `Multiple requests within ${this.pollInterval} seconds`
-            );
-            if (this.getStatusPromise) {
-              await this.getStatusPromise;
-              this.log.info(`Window heating: ${this.windowHeatingOn}`);
-            } else {
+            if (duration < this.pollInterval) {
               this.log.info(
-                `Last known state of window heating: ${this.windowHeatingOn}`
+                `Multiple requests within ${this.pollInterval} seconds`
               );
+              if (this.getStatusPromise) {
+                await this.getStatusPromise;
+                this.log.info(`Window heating: ${this.windowHeatingOn}`);
+              } else {
+                this.log.info(
+                  `Last known state of window heating: ${this.windowHeatingOn}`
+                );
+              }
+              return this.windowHeatingOn;
             }
-            return this.windowHeatingOn;
           }
-        }
 
-        this.lastStatusRequest = new Date();
+          this.lastStatusRequest = new Date();
 
-        try {
-          this.getStatusPromise = this.getCurrentState().catch((error) => {
-            this.log.error("Get window heating state: " + error);
-          });
-          await this.getStatusPromise;
-        } catch (error) {
-          this.log.error("Try get window heating state: " + error);
-        }
-        return this.windowHeatingOn;
-      });
+          try {
+            this.getStatusPromise = this.getCurrentState().catch((error) => {
+              this.log.error("Get window heating state: " + error);
+            });
+            await this.getStatusPromise;
+          } catch (error) {
+            this.log.error("Try get window heating state: " + error);
+          }
+          return this.windowHeatingOn;
+        });
 
-    this.windowHeatingService
-      .getCharacteristic(hap.Characteristic.On)
-      .onSet(async (value: CharacteristicValue) => {
-        this.log(`Set window heating state ${value}`);
+      this.windowHeatingService
+        .getCharacteristic(hap.Characteristic.On)
+        .onSet(async (value: CharacteristicValue) => {
+          this.log(`Set window heating state ${value}`);
 
-        try {
-          await this.setCurrentState("windowHeating", value ? "1" : "0").then(
-            () => {
-              this.windowHeatingOn = value == "1";
-              log("Window Heating: " + (this.windowHeatingOn ? "ON" : "OFF"));
-            },
-            (error) => {
-              this.log.error(
-                "Set window heating state Error: " + error.message
-              );
-              setTimeout(() => {
-                this.windowHeatingService
-                  .getCharacteristic(hap.Characteristic.On)
-                  .updateValue(!value);
-              }, 1000); // Go back to old value if error
-            }
-          );
-        } catch (error) {
-          this.log.error("Try set window heating state: " + error);
-        }
-      });
+          try {
+            await this.setCurrentState("windowHeating", value ? "1" : "0").then(
+              () => {
+                this.windowHeatingOn = value == "1";
+                log("Window Heating: " + (this.windowHeatingOn ? "ON" : "OFF"));
+              },
+              (error) => {
+                this.log.error(
+                  "Set window heating state Error: " + error.message
+                );
+                setTimeout(() => {
+                  this.windowHeatingService
+                    .getCharacteristic(hap.Characteristic.On)
+                    .updateValue(!value);
+                }, 1000); // Go back to old value if error
+              }
+            );
+          } catch (error) {
+            this.log.error("Try set window heating state: " + error);
+          }
+        });
+    }
 
     this.informationService = new hap.Service.AccessoryInformation()
       .setCharacteristic(hap.Characteristic.Manufacturer, this.manufacturer)
       .setCharacteristic(hap.Characteristic.Model, this.model)
       .setCharacteristic(hap.Characteristic.SerialNumber, this.serial);
+
+    this.services.push(this.informationService);
 
     this.log("WeConnect finished initializing!");
   }
@@ -655,13 +669,6 @@ class WeConnect implements AccessoryPlugin {
    * It should return all services which should be added to the accessory.
    */
   getServices(): Service[] {
-    return [
-      this.informationService,
-      this.lockService,
-      this.climatisationService,
-      this.windowHeatingService,
-      this.batteryService,
-      this.chargingSwitchService,
-    ];
+    return this.services;
   }
 }
