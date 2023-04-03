@@ -75,8 +75,14 @@
       "combineHeating": {
         "title": "Combine Heating",
         "type": "boolean",
-        "default": true,
+        "default": false,
         "description": "Climatisation will with combine heating also start window heating"
+      },
+      "showBatteryTile": {
+        "title": "Show Battery Tile",
+        "type": "boolean",
+        "default": false,
+        "description": "Will create a thermostat displaying the battery percentage"
       }
     }
   }
