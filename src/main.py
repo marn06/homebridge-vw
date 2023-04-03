@@ -6,7 +6,7 @@ import logging
 from arguments_parser import parseArguments
 from car import Car
 
-from NativeAPI import WeConnect, VWError
+from NativeAPI import VWError
 
 # Ensure working directory is same as this files location
 if os.path.dirname(sys.argv[0]):
@@ -22,16 +22,14 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-
-arguments = parseArguments()
-
 logger = logging.getLogger('WeConnect')
 
-car = Car(logger)
-
 try:
-    car.execute_command(arguments['config'],
-                        arguments['command'], arguments['value'])
+    arguments = parseArguments()
+
+    car = Car(logger)
+    car.executeCommand(arguments['config'],
+                       arguments['command'], arguments['value'])
 except VWError as e:
     if 'login.error' in e.message:
         logger.error('VWError: Failed to login')

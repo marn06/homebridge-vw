@@ -14,16 +14,15 @@ class Car:
     def __init__(self, logger):
         self.logger = logger
         self.carStates = self.getCarStates()
-        self.logger.info(self.carStates)
 
-    def execute_command(self, config, command, value):
+    def executeCommand(self, config, command, value):
         credentials = Credentials(
             config['username'], config['password'], config['spin'])
         vwc = WeConnect(credentials)
         vwc.login()
         vin = self.getVin(config, vwc)
 
-        self.logger.info(command)
+        self.logger.debug(command)
         if (command == ''):  # Get status of everything
             self.setLockedStatus(vwc, vin)
             self.setClimatisationStatus(vwc, vin)
@@ -43,8 +42,7 @@ class Car:
             self.setClimatisationStatus(vwc, vin)
             self.updateWindowHeating(vwc, vin, value)
         else:
-            self.logger.error('Unknown command')
-            exit(1)
+            raise Exception('Unknown command')
 
         print(json_helpers.to_json(self.carStates[vin], unpicklable=False))
         self.persistCarStates()
@@ -92,8 +90,8 @@ class Car:
         self.carStates[vin].windowHeating = rearWindowHeating
         self.carStates[vin].climatisation = climatisation
 
-        self.logger.info('Climater status: ' +
-                         json_helpers.to_json(climaterStatus, unpicklable=False))
+        self.logger.debug('Climater status: ' +
+                          json_helpers.to_json(climaterStatus, unpicklable=False))
 
     def setLockedStatus(self, vwc, vin):
         vsr = vwc.get_vsr(vin)
@@ -102,8 +100,8 @@ class Car:
         avdoors = {'left_front': 'Left front', 'right_front': 'Right front',
                    'left_rear': 'Left rear', 'right_rear': 'Right rear', 'trunk': 'Trunk'}
 
-        self.logger.info('Doors status: ' +
-                         json_helpers.to_json(doors, unpicklable=False))
+        self.logger.debug('Doors status: ' +
+                          json_helpers.to_json(doors, unpicklable=False))
 
         for d in avdoors.items():
             locked = doors.get('lock_'+d[0], '')
@@ -118,8 +116,8 @@ class Car:
         charging = chargerStatus['chargingStatusData']['chargingState']['content'] != 'off'
         batteryLevel = chargerStatus['batteryStatusData']['stateOfCharge']['content']
 
-        self.logger.info('Charging status: ' +
-                         json_helpers.to_json(chargerStatus, unpicklable=False))
+        self.logger.debug('Charging status: ' +
+                          json_helpers.to_json(chargerStatus, unpicklable=False))
 
         self.carStates[vin].charging = charging
         self.carStates[vin].batteryLevel = batteryLevel
@@ -129,25 +127,25 @@ class Car:
             if not self.carStates[vin].locked:
                 response = vwc.lock(vin, action='lock')
                 self.carStates[vin].locked = True
-                self.logger.info(response)
+                self.logger.debug(response)
         elif value == '0':
             if self.carStates[vin].locked:
                 response = vwc.lock(vin, action='unlock')
                 self.carStates[vin].locked = False
-                self.logger.info(response)
+                self.logger.debug(response)
 
     def updateCharging(self, vwc, vin, value):
         if value == '1':
             if not self.carStates[vin].charging:
                 chargingOn = vwc.battery_charge(vin, action='on')
-                self.logger.info(chargingOn)
+                self.logger.debug(chargingOn)
                 self.carStates[vin].charging = True if (chargingOn['action']['actionState'] ==
                                                         'queued' and chargingOn['action']['type'] == 'start') else True
 
         elif value == '0':
             if self.carStates[vin].charging:
                 chargingOff = vwc.battery_charge(vin, action='off')
-                self.logger.info(chargingOff)
+                self.logger.debug(chargingOff)
                 self.carStates[vin].charging = False if (chargingOff['action']['actionState'] ==
                                                          'queued' and chargingOff['action']['type'] == 'stop') else True
 
@@ -163,27 +161,25 @@ class Car:
                 off = windowHeatingOff['action']['actionState'] == 'queued' and windowHeatingOff['action']['type'] == 'stopWindowHeating'
                 self.carStates[vin].windowHeating = off
         elif value != 'status':
-            self.logger.error(
-                'Command: ' + 'window-heating' + ' unknown value: ' + value)
-            exit(1)
+            raise Exception('Command: ' + 'window-heating' +
+                            ' unknown value: ' + str(value))
 
     def updateClimatisation(self, vwc, vin, config, value):
         if value == '1':
             if not self.carStates[vin].climatisation:
                 climatisationOn = vwc.climatisation_v2(
                     vin, action='on', temperature=config['temperature'])
-                self.logger.info(climatisationOn)
+                self.logger.debug(climatisationOn)
                 on = climatisationOn['action']['actionState'] == 'queued' and climatisationOn['action']['type'] == 'startClimatisation'
                 if on:
                     self.carStates[vin].climatisation = True
         elif value == '0':
             if self.carStates[vin].climatisation:
                 climatisationOff = vwc.climatisation(vin, action='off')
-                self.logger.info(climatisationOff)
+                self.logger.debug(climatisationOff)
                 off = climatisationOff['action']['actionState'] == 'queued' and climatisationOff['action']['type'] == 'stopClimatisation'
                 if off:
                     self.carStates[vin].climatisation = False
         elif value != 'status':
-            self.logger.error('Command: ' + 'climatisation' +
-                              ' unknown value: ' + value)
-            exit(1)
+            raise Exception('Command: ' + 'climatisation' +
+                            ' unknown value: ' + str(value))

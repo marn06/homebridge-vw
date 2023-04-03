@@ -27,6 +27,7 @@ class WeConnect implements AccessoryPlugin {
   private readonly name: string;
   private readonly climaterName: string;
   private readonly windowHeatingName: string;
+  private readonly batteryName: string;
   private readonly lockName: string;
   private readonly chargingSwitchName: string;
   private readonly pollInterval: number;
@@ -48,6 +49,7 @@ class WeConnect implements AccessoryPlugin {
   private readonly services: Service[] = [];
   private readonly climatisationService: Service;
   private readonly windowHeatingService: Service;
+  private readonly thermostatService: Service | undefined;
   private readonly lockService: Service;
   private readonly batteryService: Service;
   private readonly chargingSwitchService: Service;
@@ -58,14 +60,14 @@ class WeConnect implements AccessoryPlugin {
 
     config["temperature"] = config["temperature"] || 24.0;
     config["vin"] = config["vin"] || "";
-    config["combineHeating"] = config["combineHeating"] || false;
 
     this.name = config.name;
     this.climaterName = config["climaterName"] || "Climatisation";
     this.windowHeatingName = config["windowHeatingName"] || "Window Heating";
+    this.batteryName = config["batteryName"] || "Battery";
     this.lockName = config["lockName"] || "Doors";
     this.chargingSwitchName = config["chargingSwitchName"] || "Charging";
-    this.pollInterval = config["pollInterval"] || 60.0;
+    this.pollInterval = config["pollInterval"] || 300.0;
     this.combineHeating = config["combineHeating"] || false;
 
     this.manufacturer = config["manufacturer"] || packageJson["author"];
@@ -92,6 +94,16 @@ class WeConnect implements AccessoryPlugin {
           return this.windowHeatingName;
         });
       this.services.push(this.windowHeatingService);
+    }
+
+    if (config["showBatteryTile"]) {
+      this.thermostatService = new hap.Service.Thermostat(this.name);
+      this.thermostatService
+        .getCharacteristic(hap.Characteristic.ConfiguredName)
+        .onGet(async () => {
+          return this.batteryName;
+        });
+      this.services.push(this.thermostatService);
     }
 
     this.lockService = new hap.Service.LockMechanism(this.name);
@@ -163,6 +175,11 @@ class WeConnect implements AccessoryPlugin {
               this.log(`Last known battery level: ${this.batteryLevel}`);
               this.log(`Last known state of charging: ${this.charging}`);
             }
+            if (this.thermostatService) {
+              this.thermostatService
+                .getCharacteristic(hap.Characteristic.CurrentTemperature)
+                .updateValue(this.batteryLevel);
+            }
             return this.batteryLevel;
           }
         }
@@ -184,7 +201,11 @@ class WeConnect implements AccessoryPlugin {
         this.batteryService
           .getCharacteristic(hap.Characteristic.ChargingState)
           .updateValue(chargingState);
-
+        if (this.thermostatService) {
+          this.thermostatService
+            .getCharacteristic(hap.Characteristic.CurrentTemperature)
+            .updateValue(this.batteryLevel);
+        }
         return this.batteryLevel;
       });
 
