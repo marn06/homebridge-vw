@@ -31,6 +31,12 @@
         "default": "Charging",
         "type": "string"
       },
+      "batteryName": {
+        "title": "Battery Name",
+        "default": "Battery",
+        "type": "string",
+        "description": "Only used when Show Battery Tile is true"
+      },
       "username": {
         "title": "Username",
         "type": "string",
@@ -76,13 +82,13 @@
         "title": "Combine Heating",
         "type": "boolean",
         "default": false,
-        "description": "Climatisation will with combine heating also start window heating"
+        "description": "Climatisation will also start window heating"
       },
       "showBatteryTile": {
         "title": "Show Battery Tile",
         "type": "boolean",
         "default": false,
-        "description": "Will create a thermostat displaying the battery percentage"
+        "description": "Creates a thermostat displaying the battery percentage"
       }
     }
   }

@@ -134,12 +134,12 @@ class WeConnect implements AccessoryPlugin {
         return this.charging;
       })
       .onSet(async (value: CharacteristicValue) => {
-        this.log(`Set charging state ${value}`);
+        this.log.debug(`Set charging state ${value}`);
         try {
           await this.setCurrentState("charging", value ? "1" : "0").then(
             () => {
               this.charging = value == "1";
-              log("Charging: " + (this.charging ? "ON" : "OFF"));
+              log.debug("Charging: " + (this.charging ? "ON" : "OFF"));
             },
             (error) => {
               this.log.error("Set charging state Error: " + error.message);
@@ -158,7 +158,7 @@ class WeConnect implements AccessoryPlugin {
     this.batteryService
       .getCharacteristic(hap.Characteristic.BatteryLevel)
       .onGet(async () => {
-        this.log("Get battery state");
+        this.log.debug("Get battery state");
 
         if (this.lastStatusRequest != undefined) {
           var now = new Date();
@@ -166,14 +166,16 @@ class WeConnect implements AccessoryPlugin {
             (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
 
           if (duration < this.pollInterval) {
-            this.log(`Multiple requests within ${this.pollInterval} seconds`);
+            this.log.debug(
+              `Multiple requests within ${this.pollInterval} seconds`
+            );
             if (this.getStatusPromise) {
               await this.getStatusPromise;
-              this.log(`Battery level: ${this.batteryLevel}`);
-              this.log(`Charging: ${this.charging}`);
+              this.log.debug(`Battery level: ${this.batteryLevel}`);
+              this.log.debug(`Charging: ${this.charging}`);
             } else {
-              this.log(`Last known battery level: ${this.batteryLevel}`);
-              this.log(`Last known state of charging: ${this.charging}`);
+              this.log.debug(`Last known battery level: ${this.batteryLevel}`);
+              this.log.debug(`Last known state of charging: ${this.charging}`);
             }
             if (this.thermostatService) {
               this.thermostatService
@@ -212,7 +214,7 @@ class WeConnect implements AccessoryPlugin {
     this.lockService
       .getCharacteristic(hap.Characteristic.LockCurrentState)
       .onGet(async () => {
-        this.log.info("Get locked state");
+        this.log.debug("Get locked state");
 
         let fetchState = true;
         if (this.lastStatusRequest != undefined) {
@@ -221,14 +223,14 @@ class WeConnect implements AccessoryPlugin {
             (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
 
           if (duration < this.pollInterval) {
-            this.log.info(
+            this.log.debug(
               `Multiple requests within ${this.pollInterval} seconds`
             );
             if (this.getStatusPromise) {
               await this.getStatusPromise;
-              this.log.info(`Locked: ${this.locked}`);
+              this.log.debug(`Locked: ${this.locked}`);
             } else {
-              this.log.info(`Last known state of locked: ${this.locked}`);
+              this.log.debug(`Last known state of locked: ${this.locked}`);
             }
             fetchState = false;
           }
@@ -260,7 +262,7 @@ class WeConnect implements AccessoryPlugin {
     this.lockService
       .getCharacteristic(hap.Characteristic.LockTargetState)
       .onSet(async (value: CharacteristicValue) => {
-        this.log(
+        this.log.debug(
           `Set locked state ${
             value == hap.Characteristic.LockTargetState.SECURED
               ? "true"
@@ -282,7 +284,9 @@ class WeConnect implements AccessoryPlugin {
           this.log.error("Try set locked state: " + error);
         }
         if (!success) {
-          this.log("Revert to: " + (this.locked ? "SECURED" : "UNSECURED"));
+          this.log.debug(
+            "Revert to: " + (this.locked ? "SECURED" : "UNSECURED")
+          );
           setTimeout(() => {
             this.lockService
               .getCharacteristic(hap.Characteristic.LockCurrentState)
@@ -305,7 +309,7 @@ class WeConnect implements AccessoryPlugin {
     this.climatisationService
       .getCharacteristic(hap.Characteristic.On)
       .onGet(async () => {
-        this.log.info("Get climatisation state");
+        this.log.debug("Get climatisation state");
 
         if (this.lastStatusRequest != undefined) {
           var now = new Date();
@@ -313,14 +317,14 @@ class WeConnect implements AccessoryPlugin {
             (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
 
           if (duration < this.pollInterval) {
-            this.log.info(
+            this.log.debug(
               `Multiple requests within ${this.pollInterval} seconds`
             );
             if (this.getStatusPromise) {
               await this.getStatusPromise;
-              this.log.info(`Climatisation: ${this.climatisationOn}`);
+              this.log.debug(`Climatisation: ${this.climatisationOn}`);
             } else {
-              this.log.info(
+              this.log.debug(
                 `Last known state of climatisation: ${this.climatisationOn}`
               );
             }
@@ -344,13 +348,15 @@ class WeConnect implements AccessoryPlugin {
     this.climatisationService
       .getCharacteristic(hap.Characteristic.On)
       .onSet(async (value: CharacteristicValue) => {
-        this.log(`Set climatisation state ${value}`);
+        this.log.debug(`Set climatisation state ${value}`);
 
         try {
           await this.setCurrentState("climatisation", value ? "1" : "0").then(
             () => {
               this.climatisationOn = value == "1";
-              log("Climatisation: " + (this.climatisationOn ? "ON" : "OFF"));
+              log.debug(
+                "Climatisation: " + (this.climatisationOn ? "ON" : "OFF")
+              );
             },
             (error) => {
               this.log.error("Set climatisation state Error: " + error.message);
@@ -370,7 +376,7 @@ class WeConnect implements AccessoryPlugin {
       this.windowHeatingService
         .getCharacteristic(hap.Characteristic.On)
         .onGet(async () => {
-          this.log.info("Get window heating state");
+          this.log.debug("Get window heating state");
 
           if (this.lastStatusRequest != undefined) {
             var now = new Date();
@@ -378,14 +384,14 @@ class WeConnect implements AccessoryPlugin {
               (now.valueOf() - this.lastStatusRequest.valueOf()) / 1000;
 
             if (duration < this.pollInterval) {
-              this.log.info(
+              this.log.debug(
                 `Multiple requests within ${this.pollInterval} seconds`
               );
               if (this.getStatusPromise) {
                 await this.getStatusPromise;
-                this.log.info(`Window heating: ${this.windowHeatingOn}`);
+                this.log.debug(`Window heating: ${this.windowHeatingOn}`);
               } else {
-                this.log.info(
+                this.log.debug(
                   `Last known state of window heating: ${this.windowHeatingOn}`
                 );
               }
@@ -409,13 +415,18 @@ class WeConnect implements AccessoryPlugin {
       this.windowHeatingService
         .getCharacteristic(hap.Characteristic.On)
         .onSet(async (value: CharacteristicValue) => {
-          this.log(`Set window heating state ${value}`);
+          this.log.debug(`Set window heating state ${value}`);
 
           try {
-            await this.setCurrentState("windowHeating", value ? "1" : "0").then(
+            await this.setCurrentState(
+              "window-heating",
+              value ? "1" : "0"
+            ).then(
               () => {
                 this.windowHeatingOn = value == "1";
-                log("Window Heating: " + (this.windowHeatingOn ? "ON" : "OFF"));
+                this.log.debug(
+                  "Window Heating: " + (this.windowHeatingOn ? "ON" : "OFF")
+                );
               },
               (error) => {
                 this.log.error(
@@ -441,7 +452,7 @@ class WeConnect implements AccessoryPlugin {
 
     this.services.push(this.informationService);
 
-    this.log("WeConnect finished initializing!");
+    this.log.info("WeConnect finished initializing!");
   }
 
   /*
@@ -449,7 +460,7 @@ class WeConnect implements AccessoryPlugin {
    * Typical this only ever happens at the pairing process.
    */
   identify(): void {
-    this.log("Identify!");
+    this.log.info("Identify!");
   }
 
   async setCurrentState(command: string, value: string): Promise<void> {
@@ -466,7 +477,7 @@ class WeConnect implements AccessoryPlugin {
 
     python.stderr.on("data", (data) => {
       error = data;
-      this.log("Python: " + error);
+      this.log.error("Python: " + error);
     });
 
     python.stdout.on("data", (data) => {
@@ -488,7 +499,7 @@ class WeConnect implements AccessoryPlugin {
       } else if (value == "0" && !currentState) {
         success = true;
       } else {
-        this.log(
+        this.log.error(
           `Python error due to: Current State ${currentState} and Set Value ${value}`
         );
       }
@@ -545,7 +556,7 @@ class WeConnect implements AccessoryPlugin {
               state = this.windowHeatingOn;
             }
 
-            console.log(
+            this.log.debug(
               `State after ${(timeout / 1000) * tryNumber} seconds: ` +
                 command +
                 " = " +
@@ -568,7 +579,7 @@ class WeConnect implements AccessoryPlugin {
                 this.chargingSwitchService
                   .getCharacteristic(hap.Characteristic.On)
                   .updateValue(state);
-                console.log(
+                this.log.error(
                   `Failed setting state of ${command} to ${value} after ${maxTries} tries`
                 );
               }
@@ -589,7 +600,7 @@ class WeConnect implements AccessoryPlugin {
                 this.lockService
                   .getCharacteristic(hap.Characteristic.LockTargetState)
                   .updateValue(lockState);
-                console.log(
+                this.log.error(
                   `Failed setting state of ${command} to ${value} after ${maxTries} tries`
                 );
               }
@@ -611,7 +622,7 @@ class WeConnect implements AccessoryPlugin {
                 service
                   .getCharacteristic(hap.Characteristic.On)
                   .updateValue(state);
-                console.log(
+                this.log.error(
                   `Failed setting state of ${command} to ${value} after ${maxTries} tries`
                 );
               }
@@ -651,7 +662,7 @@ class WeConnect implements AccessoryPlugin {
 
     python.stderr.on("data", (data) => {
       error = data;
-      this.log("Python: " + error);
+      this.log.error("Python: " + error);
     });
 
     python.stdout.on("data", (data) => {
