@@ -16,6 +16,7 @@ try:
     arguments = parseArguments()
 
     loggingLevel = arguments['config']['loggingLevel']
+
     logging.basicConfig(
         level=loggingLevel,
         format='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s',
@@ -25,8 +26,9 @@ try:
             logging.StreamHandler()
         ]
     )
-    logger = logging.getLogger('WeConnect')
     
+    logger = logging.getLogger('WeConnect')
+     
     logger.setLevel(loggingLevel)
 
     car = Car(logger)
