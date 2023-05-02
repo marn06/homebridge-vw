@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [1.0.13](https://github.com/marn06/homebridge-vw/compare/v1.0.12...v1.0.13) (2023-05-02)
 
+### [1.0.13](https://github.com/marn06/homebridge-vw/compare/v1.0.12...v1.0.13) (2023-05-02)
+
 ### [1.0.12](https://github.com/marn06/homebridge-vw/compare/v1.0.9...v1.0.12) (2023-04-05)
 
 ### [1.0.11](https://github.com/marn06/homebridge-vw/compare/v1.0.9...v1.0.11) (2023-04-03)
