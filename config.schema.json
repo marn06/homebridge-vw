@@ -89,6 +89,12 @@
         "type": "boolean",
         "default": false,
         "description": "Creates a thermostat displaying the battery percentage"
+      },
+      "loggingLevel": {
+        "title": "Logging Level",
+        "type": "string",
+        "default": "WARNING",
+        "required": false
       }
     }
   }

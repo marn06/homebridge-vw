@@ -23,9 +23,10 @@ logging.basicConfig(
     ]
 )
 logger = logging.getLogger('WeConnect')
-
 try:
     arguments = parseArguments()
+    
+    logger.setLevel(arguments['loggingLevel'])
 
     car = Car(logger)
     car.executeCommand(arguments['config'],

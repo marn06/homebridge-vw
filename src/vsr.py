@@ -7,6 +7,8 @@ Created on Mon Jun 28 00:08:42 2021
 """
 import logging
 
+# Uses logging.basicConfig from main.py
+logger = logging.getLogger('VSR')
 
 class VSR:
     __vsr_fields = [
@@ -173,7 +175,7 @@ class VSR:
                                     found = True
                                     break
                             if (not found):
-                                logging.warning(
+                                logger.warning(
                                     '[parse_vsr] item %s, field %s not found', d['id'], f['id'])
-                                logging.warning('[parse_vsr] %s', f)
+                                logger.warning('[parse_vsr] %s', f)
         return rr

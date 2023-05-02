@@ -19,6 +19,7 @@ class Car:
         credentials = Credentials(
             config['username'], config['password'], config['spin'])
         vwc = WeConnect(credentials)
+        vwc.set_logging_level(self.logger.level)
         vwc.login()
         vin = self.getVin(config, vwc)
 

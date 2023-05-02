@@ -22,7 +22,6 @@ from credentials import Credentials
 
 # Uses logging.basicConfig from main.py
 logger = logging.getLogger('API')
-logger.setLevel(logging.WARNING)
  
 class VWError(Exception):
     def __init__(self, message):
