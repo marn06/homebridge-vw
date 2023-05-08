@@ -83,12 +83,22 @@ class Car:
     def setClimatisationStatus(self, vwc, vin):
         climaterStatus = vwc.get_climater(vin)['climater']['status']
 
-        climatisation = climaterStatus['climatisationStatusData']['climatisationState']['content'] == 'heating'
-        frontWindowHeating = climaterStatus['windowHeatingStatusData']['windowHeatingStateFront']['content'] == 'on'
-        rearWindowHeating = climaterStatus['windowHeatingStatusData']['windowHeatingStateRear']['content'] == 'on'
+        climatisation = False
+        windowHeating = False
 
-        # and frontWindowHeating It seems front is not enabled while climatisation is.
-        self.carStates[vin].windowHeating = rearWindowHeating
+        try:
+            climatisation = climaterStatus['climatisationStatusData']['climatisationState']['content'] == 'heating'
+        except:
+            pass
+
+        try:
+            frontWindowHeating = climaterStatus['windowHeatingStatusData']['windowHeatingStateFront']['content'] == 'on'
+            rearWindowHeating = climaterStatus['windowHeatingStatusData']['windowHeatingStateRear']['content'] == 'on'
+            windowHeating = rearWindowHeating or frontWindowHeating
+        except:
+            pass
+
+        self.carStates[vin].windowHeating = windowHeating
         self.carStates[vin].climatisation = climatisation
 
         self.logger.debug('Climater status: ' +
