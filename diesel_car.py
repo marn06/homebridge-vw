@@ -26,7 +26,7 @@ class Car:
         self.logger.debug(command)
         if (command == ''):  # Get status of everything
             self.setLockedStatus(vwc, vin)
-            #self.setClimatisationStatus(vwc, vin)
+            self.setClimatisationStatus(vwc, vin)
             #self.setChargingStatus(vwc, vin)
         elif command == 'locked':
             self.setLockedStatus(vwc, vin)
@@ -36,14 +36,14 @@ class Car:
             #self.updateCharging(vwc, vin, value)
             pass
         elif command == 'climatisation':
-            #self.setClimatisationStatus(vwc, vin)
-            #self.updateClimatisation(vwc, vin, config, value)
-            #if config['combineHeating']:
-            #    self.updateWindowHeating(vwc, vin, value)
+            self.setClimatisationStatus(vwc, vin)
+            self.updateClimatisation(vwc, vin, config, value)
+            if config['combineHeating']:
+                self.updateWindowHeating(vwc, vin, value)
             pass
         elif command == 'window-heating':
-            #self.setClimatisationStatus(vwc, vin)
-            #self.updateWindowHeating(vwc, vin, value)
+            self.setClimatisationStatus(vwc, vin)
+            self.updateWindowHeating(vwc, vin, value)
             pass
         else:
             raise Exception('Unknown command')
