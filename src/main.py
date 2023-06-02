@@ -13,12 +13,8 @@ if os.path.dirname(sys.argv[0]):
     os.chdir(os.path.dirname(sys.argv[0]))
 
 try:
-    arguments = parseArguments()
-
-    loggingLevel = arguments['config']['loggingLevel']
-
     logging.basicConfig(
-        level=loggingLevel,
+        level=logging.WARNING,
         format='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s',
         datefmt='%d/%m/%Y %H:%M:%S',
         handlers=[
@@ -26,9 +22,10 @@ try:
             logging.StreamHandler()
         ]
     )
-    
+
     logger = logging.getLogger('WeConnect')
-     
+    arguments = parseArguments()
+    loggingLevel = arguments['config']['loggingLevel']
     logger.setLevel(loggingLevel)
 
     car = Car(logger)
