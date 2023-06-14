@@ -26,25 +26,13 @@ class Car:
         self.logger.debug(command)
         if (command == ''):  # Get status of everything
             self.setLockedStatus(vwc, vin)
-            #self.setClimatisationStatus(vwc, vin)
-            #self.setChargingStatus(vwc, vin)
+            self.setClimatisationStatus(vwc, vin)
         elif command == 'locked':
             self.setLockedStatus(vwc, vin)
             self.updateLocked(vwc, vin, value)
-        elif command == 'charging':
-            #self.setChargingStatus(vwc, vin)
-            #self.updateCharging(vwc, vin, value)
-            pass
         elif command == 'climatisation':
-            #self.setClimatisationStatus(vwc, vin)
-            #self.updateClimatisation(vwc, vin, config, value)
-            #if config['combineHeating']:
-            #    self.updateWindowHeating(vwc, vin, value)
-            pass
-        elif command == 'window-heating':
-            #self.setClimatisationStatus(vwc, vin)
-            #self.updateWindowHeating(vwc, vin, value)
-            pass
+            self.setClimatisationStatus(vwc, vin)
+            self.updateClimatisation(vwc, vin, config, value)
         else:
             raise Exception('Unknown command')
 
@@ -84,28 +72,14 @@ class Car:
         return vin
 
     def setClimatisationStatus(self, vwc, vin):
-        climaterStatus = vwc.get_climater(vin)['climater']['status']
+        climaterStatus = vwc.get_heating_status(vin)
+
+        self.logger.info(climaterStatus)
 
         climatisation = False
-        windowHeating = False
 
-        try:
-            climatisation = climaterStatus['climatisationStatusData']['climatisationState']['content'] == 'heating'
-        except:
-            pass
-
-        try:
-            frontWindowHeating = climaterStatus['windowHeatingStatusData']['windowHeatingStateFront']['content'] == 'on'
-            rearWindowHeating = climaterStatus['windowHeatingStatusData']['windowHeatingStateRear']['content'] == 'on'
-            windowHeating = rearWindowHeating or frontWindowHeating
-        except:
-            pass
-
-        self.carStates[vin].windowHeating = windowHeating
         self.carStates[vin].climatisation = climatisation
 
-        self.logger.debug('Climater status: ' +
-                          json_helpers.to_json(climaterStatus, unpicklable=False))
 
     def setLockedStatus(self, vwc, vin):
         vsr = vwc.get_vsr(vin)
@@ -181,19 +155,13 @@ class Car:
     def updateClimatisation(self, vwc, vin, config, value):
         if value == '1':
             if not self.carStates[vin].climatisation:
-                climatisationOn = vwc.climatisation_v2(
-                    vin, action='on', temperature=config['temperature'])
-                self.logger.debug(climatisationOn)
-                on = climatisationOn['action']['actionState'] == 'queued' and climatisationOn['action']['type'] == 'startClimatisation'
-                if on:
-                    self.carStates[vin].climatisation = True
+                climatisationOn = vwc.heating(
+                    vin, action='on')
+                self.logger.info(climatisationOn)
         elif value == '0':
             if self.carStates[vin].climatisation:
-                climatisationOff = vwc.climatisation(vin, action='off')
-                self.logger.debug(climatisationOff)
-                off = climatisationOff['action']['actionState'] == 'queued' and climatisationOff['action']['type'] == 'stopClimatisation'
-                if off:
-                    self.carStates[vin].climatisation = False
+                climatisationOff = vwc.heating(vin, action='off')
+                self.logger.info(climatisationOff)
         elif value != 'status':
             raise Exception('Command: ' + 'climatisation' +
                             ' unknown value: ' + str(value))
