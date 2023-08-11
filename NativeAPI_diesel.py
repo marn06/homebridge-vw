@@ -4,7 +4,6 @@ Created on Sun May 10 19:12:29 2020
 
 @author: Trocotronic
 """
-from urllib.parse import urlparse, unquote_plus, parse_qs
 import re
 import xmltodict
 import json
@@ -20,15 +19,10 @@ from bs4 import BeautifulSoup
 import logging
 from vsr import VSR
 from credentials import Credentials
-import yaml
 
-logging.basicConfig(
-    format='[%(asctime)s] [%(name)s::%(levelname)s] %(message)s', datefmt='%d/%m/%Y %H:%M:%S')
-
+# Uses logging.basicConfig from main.py
 logger = logging.getLogger('API')
-logger.setLevel(logging.getLogger().level)
-
-
+ 
 class VWError(Exception):
     def __init__(self, message):
         self.message = message
@@ -46,7 +40,7 @@ class UrlError(VWError):
 
 def get_random_string(length=12,
                       allowed_chars='abcdefghijklmnopqrstuvwxyz'
-                                    'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'):
+                      'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-'):
     return ''.join(random.choice(allowed_chars) for i in range(length))
 
 
@@ -137,18 +131,25 @@ class WeConnect():
                 e = r.json()
                 msg = 'Error {}'.format(r.status_code)
                 logger.debug('Response error in JSON format')
-                if ('error' in e):
+                if ('error' in e): 
                     msg += ':'
+                    if (isinstance(e['error'], str)):
+                        msg += ' [{}]'.format(e['error'])
                     if ('errorCode' in e['error']):
                         msg += ' [{}]'.format(e['error']['errorCode'])
                     if ('description' in e['error']):
                         msg += ' '+e['error']['description']
-            except ValueError:
+                    if ('error_description' in e):
+                        msg += ' '+e['error_description']
+                    
+                    #TODO: It should not just delete the file it should find the real cause.
+                    logger.debug('Removing ACCESS FILE (This is a temporary fix, actual cause should be found)')
+                    os.remove(self.ACCESS_FILE)
+            except ValueError: 
                 logger.debug('Response error is not JSON format')
-                msg = "Error: status code {}".format(r.status_code)
+                msg = 'Error: status code {}'.format(r.status_code)
+
             raise UrlError(r.status_code, msg, r)
-        # else:
-        #    print(r.content.decode())
         return r
 
     def __command(self, command, post=None, data=None, dashboard=None, accept='application/json', content_type=None, scope=None, secure_token=None):
@@ -157,6 +158,7 @@ class WeConnect():
         if (not scope):
             scope = self.__tokens
         command = command.format(brand=self.__brand, country=self.__country)
+
         logger.info('Preparing command: %s', command)
         if (post):
             logger.debug('JSON data: %s', post)
@@ -190,16 +192,16 @@ class WeConnect():
             headers['X-MBBSecToken'] = secure_token
         r = self.__get_url(dashboard+command, json=post,
                            post=data, headers=headers)
-        if ('json' in r.headers.get('Content-Type', [])):
+        if ('json' in r.headers['Content-Type']):
             jr = r.json()
             return jr
         return r
 
-    def __init__(self):
+    def __init__(self, credentials: Credentials):
         self.__session = requests.Session()
         self.__credentials['user'] = credentials.username
         self.__credentials['password'] = credentials.password
-        self.__credentials['spin'] = None
+        self.__credentials['spin'] = credentials.spin
         if (hasattr(credentials, 'spin') and credentials.spin is not None):
             if (isinstance(credentials.spin, int)):
                 credentials.spin = str(credentials.spin).zfill(4)
@@ -221,7 +223,7 @@ class WeConnect():
             logger.warning('Session file not found')
         try:
             with open(WeConnect.ACCESS_FILE, 'rb') as f:
-                d = json.load(f)
+                d = json.load(f) 
                 self.__identities = d['identities']
                 self.__identity_kit = d['identity_kit']
                 self.__tokens = d['tokens']
@@ -229,6 +231,8 @@ class WeConnect():
                 self.__oauth = d['oauth']
         except FileNotFoundError:
             logger.warning('Access file not found')
+        except Exception as ex:
+            logger.warning(ex)   
         self.__session.mount("carnet://", CarNetAdapter())
 
     def __refresh_oauth_scope(self, scope):
@@ -283,23 +287,6 @@ class WeConnect():
         logger.debug('Checking tokens')
         return self.__check_kit_tokens() and self.__check_oauth_tokens()
 
-    def __get_idk(self, soup):
-        scripts = soup.find_all('script')
-        for script in scripts:
-            if script.string and 'window._IDK' in script.string:
-                print(script.string)
-                try:
-                    idk_txt = '{'+re.search(r'\{(.*)\}',
-                                            script.string, re.M | re.S).group(1)+'}'
-                    idk_txt = re.sub(
-                        r'([\{\s,])(\w+)(:)', r'\1"\2"\3', idk_txt.replace('\'', '"'))
-                    print(idk_txt)
-                    idk = yaml.load(idk_txt, Loader=yaml.FullLoader)
-                    return idk
-                except json.decoder.JSONDecodeError:
-                    raise VWError('Cannot find IDK credentials')
-        return None
-
     def __save_access(self):
         t = {}
         t['identities'] = self.__identities
@@ -312,37 +299,9 @@ class WeConnect():
         logger.info('Saving access to file')
 
     def login(self):
-        logger.info('logger')
         if (not self.__check_tokens()):
             return self.__force_login()
         return True
-
-    def __parse_market_consent(self, r):
-        soup = BeautifulSoup(r.text, 'html.parser')
-        upr = urlparse(r.url)
-        qs = parse_qs(upr.query)
-        idk = self.__get_idk(soup)
-        ix = 0
-        while ('templateModel' in idk and 'csrf_token' in idk and 'hmac' in idk['templateModel'] and 'marketChannels' in idk['templateModel']):
-            logger.debug('Found marketChannels')
-            post = {
-                'documentKey': idk['templateModel']['documentKey'],
-                '_csrf': idk['csrf_token'],
-                'hmac': idk['templateModel']['hmac'],
-                'countryOfJurisdiction': idk['templateModel']['countryOfJurisdiction'],
-                'language': idk['templateModel']['language'],
-                'callback': idk['templateModel']['callback'],
-                'relayState': idk['templateModel']['relayStateToken'],
-            }
-            for idx, mkt in enumerate(idk['templateModel']['marketChannels']):
-                post[f'channel{mkt["channelId"]}'] = False
-
-            r = self.__get_url(
-                f'{upr.scheme}://{upr.netloc}{"/".join(upr.path.split("/")[:-1])}/{str(ix)}/skip', post=post)
-            if ('carnet://' in r.url):
-                break
-            idk = self.__get_idk(soup)
-            ix += 1
 
     def __force_login(self):
         logger.warning('Forcing login')
@@ -385,7 +344,18 @@ class WeConnect():
         upr = urlparse(r.url)
         r = self.__get_url(upr.scheme+'://'+upr.netloc+form_url, post=post)
         soup = BeautifulSoup(r.text, 'html.parser')
-        idk = self.__get_idk(soup)
+        scripts = soup.find_all('script')
+        for script in scripts:
+            if script.string and 'window._IDK' in script.string:
+                try:
+                    idk_txt = '{'+re.search(r'\{(.*)\}',
+                                            script.string, re.M | re.S).group(1)+'}'
+                    idk_txt = re.sub(
+                        r'([\{\s,])(\w+)(:)', r'\1"\2"\3', idk_txt.replace('\'', '"'))
+                    idk = json.loads(idk_txt)
+                    break
+                except json.decoder.JSONDecodeError:
+                    raise VWError('Cannot find IDK credentials')
 
         post['hmac'] = idk['templateModel']['hmac']
         post['password'] = self.__credentials['password']
@@ -419,32 +389,14 @@ class WeConnect():
                         logger.info(
                             'Successfully accepted updated terms and conditions')
                     else:
-                        logger.debug('Get IDK for legal documents')
-                        idk = self.__get_idk(soup)
-                        if ('templateModel' in idk and 'legalDocuments' in idk['templateModel'] and 'csrf_token' in idk and 'hmac' in idk['templateModel']):
-                            logger.debug('Found legal documents')
-                            post = {'countryOfResidence': idk['userSession']['countryOfResidence'],
-                                    '_csrf': idk['csrf_token'], 'hmac': idk['templateModel']['hmac']}
-                            for idx, legal in enumerate(idk['templateModel']['legalDocuments']):
-                                for name, val in legal.items():
-                                    post[f'legalDocuments[{idx}].{name}'] = val
-                            qs = parse_qs(upr.query)
-                            for name, val in qs.items():
-                                post[name] = val[0]
-                            upr = urlparse(r.url)
-                            r = self.__get_url(
-                                upr.scheme+'://'+upr.netloc+upr.path, post=post)
-                            logger.debug('Got marketing consent')
-                            self.__parse_market_consent(r)
-
+                        logger.critical(
+                            'Failed to accept new terms and conditions, try manually at: ' + idk['templateModel']['loginUrl'])
                     break
                 elif (metakit['content'] == 'loginAuthenticate'):
                     logger.warn('Meta identitykit is loginAuthenticate')
                     if ('error' in r.url):
                         raise VWError(r.url.split('error=')[1])
-                elif (metakit['content'] == 'marketConsent'):
-                    logger.debug('Meta identitykit is marketConsent')
-                    self.__parse_market_consent(r)
+
         self.__identities = get_url_params(r.history[-1].url)
         logger.info('Received Identities')
         logger.debug('Identities = %s', self.__identities)
@@ -537,9 +489,6 @@ class WeConnect():
 
     def set_logging_level(self, level):
         logger.setLevel(level)
-
-    def version(self):
-        return _version.__version__
 
     def get_personal_data(self):
         r = self.__command(
@@ -737,8 +686,6 @@ class WeConnect():
                 'type': 'startClimatisation',
                 'settings': {
                     'targetTemperature': dk,
-                    'heaterSource': 'electric',
-                    'climatisationWithoutHVpower': True,
                     'climaterElementSettings': {
                                     'isMirrorHeatingEnabled': True,
                                     'zoneSettings': {
@@ -780,12 +727,15 @@ class WeConnect():
             vin), post=data, scope=self.__oauth['sc2:fal'], accept=self.__accept_mbb, secure_token=secure_token)
         return r
 
-    def climatisation(self, vin, action='off'):
+    def climatisation(self, vin, action='off', temperature=21.5):
+        dk = int(temperature*10)+2731
         data = {
             'action': {
-                'type': 'startClimatisation' if action.lower() == 'on' else 'stopClimatisation'
+                'type': 'startClimatisation' if action.lower() == 'on' else 'stopClimatisation',
+                'settings': {
+                    'targetTemperature': dk
+                }
             }
-
         }
         secure_token = self.__request_secure_token(
             vin, 'rclima_v1/operations/P_START_CLIMA_AU')
@@ -804,8 +754,8 @@ class WeConnect():
                     'heaterSource': 'electric',
                 }
             }
-
         }
+
         secure_token = self.__request_secure_token(
             vin, 'rclima_v1/operations/P_START_CLIMA_AU')
         r = self.__command('/bs/climatisation/v1/{brand}/{country}/vehicles/'+vin+'/climater/actions', dashboard=self.__get_fal_url(
@@ -817,7 +767,6 @@ class WeConnect():
             'action': {
                 'type': 'startWindowHeating' if action.lower() == 'on' else 'stopWindowHeating'
             }
-
         }
         secure_token = self.__request_secure_token(
             vin, 'rclima_v1/operations/P_START_CLIMA_AU')
@@ -881,7 +830,7 @@ class WeConnect():
             data = '<?xml version="1.0" encoding= "UTF-8" ?>\n<rluAction xmlns="http://audi.de/connect/rlu">\n   <action>lock</action>\n</rluAction>'
         secure_token = self.__request_secure_token(
             vin, 'rlu_v1/operations/' + action.upper())
-        r = self.__command('/bs/rlu/v1/{brand}/{country}/vehicles/'+vin+'/actions', dashboard=self.BASE_URL, data=data,
+        r = self.__command('/bs/rlu/v1/{brand}/{country}/vehicles/'+vin+'/actions', dashboard=self.__get_fal_url(vin), data=data,
                            scope=self.__oauth['sc2:fal'], accept=self.__accept_mbb, content_type='application/vnd.vwg.mbb.RemoteLockUnlock_v1_0_0+xml', secure_token=secure_token)
         return r
 
