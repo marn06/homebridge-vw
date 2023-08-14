@@ -553,6 +553,7 @@ class WeConnect implements AccessoryPlugin {
         });
 
         python.stdout.on("data", (data) => {
+            this.log.debug(data);
             let parsed = JSON.parse(data);
             if (command == "climatisation") {
                 currentState = this.combineHeating
