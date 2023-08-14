@@ -287,13 +287,11 @@ class WeConnect():
         scripts = soup.find_all('script')
         for script in scripts:
             if script.string and 'window._IDK' in script.string:
-                print(script.string)
                 try:
                     idk_txt = '{'+re.search(r'\{(.*)\}',
                                             script.string, re.M | re.S).group(1)+'}'
                     idk_txt = re.sub(
                         r'([\{\s,])(\w+)(:)', r'\1"\2"\3', idk_txt.replace('\'', '"'))
-                    print(idk_txt)
                     idk = yaml.load(idk_txt, Loader=yaml.FullLoader)
                     return idk
                 except json.decoder.JSONDecodeError:
