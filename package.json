@@ -18,7 +18,7 @@
   },
   "scripts": {
     "clean": "rimraf ./dist",
-    "python": "python3 -m venv dist/venv && dist/venv/bin/pip3 install beautifulsoup4 jsonpickle requests xmltodict typing_extensions",
+    "python": "python3 -m venv dist/venv && dist/venv/bin/pip3 install beautifulsoup4 jsonpickle requests xmltodict typing_extensions yaml",
     "build": "rimraf ./dist && tsc && copyfiles -f src/*.py dist",
     "postinstall": "node postinstall.js",
     "release": "git add . && git commit . -m release && standard-version && git push --follow-tags origin master",
