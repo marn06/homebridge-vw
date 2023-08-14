@@ -767,7 +767,7 @@ class WeConnect implements AccessoryPlugin {
                 success = true;
             } catch (dataError) {
                 this.log.error(
-                    "Get current state on data received: " + dataError
+                    `Get current state on data received: ${data} with error: ${dataError}`
                 );
             }
         });

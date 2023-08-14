@@ -21,6 +21,7 @@ class Car:
         vwc = WeConnect(credentials)
         vwc.set_logging_level(self.logger.level)
         vwc.login()
+
         vin = self.getVin(config, vwc)
 
         self.logger.debug(command)
@@ -66,7 +67,11 @@ class Car:
                 return CarStates()
 
     def getVin(self, config, vwc):
-        vin = config['vin']
+        vin = ""
+        
+        if ('vin' in config):
+            vin = config['vin']
+        
         if len(vin) == 0:
             vin = vwc.get_real_car_data(
             )['realCars'][0]['vehicleIdentificationNumber']
